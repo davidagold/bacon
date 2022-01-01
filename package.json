@@ -1,0 +1,26 @@
+{
+  "name": "@davidagold/bacon",
+  "version": "0.0.1",
+  "description": "Framework for experiments",
+  "main": "dist/cloudformation/bacon.cdk.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dag-org/bacon.git"
+  },
+  "author": "David A. Gold",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dag-org/bacon/issues"
+  },
+  "homepage": "https://github.com/dag-org/bacon#readme",
+  "dependencies": {
+    "@davidagold/artifacts": "0.0.4",
+    "@mapbox/cloudfriend": "^5.1.0",
+    "aws-cdk-lib": "^2.3.0",
+    "constructs": "^10.0.21",
+    "uuid": "^8.3.2"
+  }
+}
