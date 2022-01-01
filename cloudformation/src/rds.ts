@@ -1,4 +1,4 @@
-import { Duration} from "aws-cdk-lib/core";
+import { Duration} from "aws-cdk-lib";
 import { Construct } from 'constructs';
 import {
 	DatabaseInstance,

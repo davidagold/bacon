@@ -1,7 +1,7 @@
 import { Rds, RdsConfig } from "./src/rds";
 import {InstanceClass, InstanceSize, InstanceType } from "aws-cdk-lib/aws-ec2";
 import { RetentionDays } from "aws-cdk-lib/aws-logs";
-import cdk = require("aws-cdk-lib/core")
+import cdk = require("aws-cdk-lib")
 import { CfnCondition, CfnParameter } from "aws-cdk-lib";
 
 export interface AirflowTaskConfig {

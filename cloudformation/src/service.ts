@@ -1,4 +1,4 @@
-import { CfnOutput, Duration } from "aws-cdk-lib/core";
+import { CfnOutput, Duration } from "aws-cdk-lib";
 import { Construct } from 'constructs';
 import { IVpc } from "aws-cdk-lib/aws-ec2";
 import { FargatePlatformVersion, FargateTaskDefinition } from 'aws-cdk-lib/aws-ecs';

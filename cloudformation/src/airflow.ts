@@ -1,4 +1,4 @@
-import { CfnOutput } from "aws-cdk-lib/core";
+import { CfnOutput } from "aws-cdk-lib";
 import { Construct } from 'constructs';
 import { IVpc } from "aws-cdk-lib/aws-ec2";
 
@@ -9,13 +9,13 @@ import { FargateTaskDefinition } from 'aws-cdk-lib/aws-ecs';
 
 import { config, ContainerConfig } from "../config";
 import { Service } from "./service";
+import { Rds } from "./rds"
 import { v4 as uuidv4 } from 'uuid';
 
 
 export interface AirflowProps {
   readonly vpc: IVpc;
   readonly cluster: ecs.ICluster;
-  readonly dbConnection: string;
   readonly defaultVpcSecurityGroup: ec2.ISecurityGroup;
   readonly privateSubnets: ec2.ISubnet[];
 }
@@ -25,12 +25,16 @@ export class Airflow extends Construct {
 
     constructor(parent: Construct, name: string, props: AirflowProps) {
         super(parent, name);
-
+        
+        const rds = new Rds(this, "RDS-Postgres", {
+			defaultVpcSecurityGroup: props.defaultVpcSecurityGroup,
+			vpc: props.vpc
+		});
         const adminPassword = uuidv4();
         const env = {
-            AIRFLOW__CORE__SQL_ALCHEMY_CONN: props.dbConnection,
+            AIRFLOW__CORE__SQL_ALCHEMY_CONN: rds.dbConnection,
             AIRFLOW__CELERY__BROKER_URL: "sqs://",
-            AIRFLOW__CELERY__RESULT_BACKEND: "db+" + props.dbConnection,
+            AIRFLOW__CELERY__RESULT_BACKEND: "db+" + rds.dbConnection,
             AIRFLOW__CORE__EXECUTOR: "CeleryExecutor",
             AIRFLOW__WEBSERVER__RBAC: "True",
             ADMIN_PASS: adminPassword,
