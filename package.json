@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/dag-org/bacon#readme",
   "dependencies": {
-    "@davidagold/artifacts": "0.0.4",
+    "@davidagold/artifacts": "^0.0.5",
     "@mapbox/cloudfriend": "^5.1.0",
     "aws-cdk-lib": "^2.3.0",
     "constructs": "^10.0.21",
