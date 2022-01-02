@@ -16,11 +16,17 @@ let Resources = {
 let Outputs = {
     AirflowImageRepositoryArn: {
         Description: "ARN of Docker image repository",
-        Value: cf.getAtt("AirflowImageRepository", "Arn")
+        Value: cf.getAtt("AirflowImageRepository", "Arn"),
+        Export: {
+            Name: cf.join("-", cf.stackName, "AirflowImageRepositoryArn")
+        }
     },
     AirflowRepositoryUri: {
         Description: "URI of container registry",
-        Value: cf.getAtt("AirflowImageRepository", "RepositoryUri")
+        Value: cf.getAtt("AirflowImageRepository", "RepositoryUri"),
+        Export: {
+            Name: cf.join("-", cf.stackName, "AirflowImageRepositoryUri")
+        }
     }
 }
 
