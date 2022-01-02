@@ -36,11 +36,11 @@ module.exports = cf.merge(
                 Value: "NpmTokenReadOnlySecret:NPM_TOKEN_READ_ONLY"
             }
         ],
-        // InstallCommands: [
-        //     "nohup /usr/local/bin/dockerd --host=unix:///var/run/docker.sock " +
-        //         "-host=tcp://127.0.0.1:2375 --storage-driver=overlay2 &",
-        //     "timeout 15 sh -c \"until docker info; do echo .; sleep 1; done\""
-        // ],
+        InstallCommands: [
+            "nohup /usr/local/bin/dockerd --host=unix:///var/run/docker.sock " +
+                "-host=tcp://127.0.0.1:2375 --storage-driver=overlay2 &",
+            "timeout 15 sh -c \"until docker info; do echo .; sleep 1; done\""
+        ],
         BuildCommands: [
             "(cd airflow && " +
             "docker build " +
