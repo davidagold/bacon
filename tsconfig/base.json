@@ -6,7 +6,7 @@
         "removeComments": true,
         "allowJs": true,
         "moduleResolution": "node",
-        "rootDir": "./"
+        "rootDir": "../"
     },
     "exclude": ["node_modules"]
 }

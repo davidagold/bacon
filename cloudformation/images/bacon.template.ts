@@ -29,13 +29,13 @@ module.exports = cf.merge(
         GitHubAccount: "dag-org",
         GitHubRepositoryName: "bacon",
         PrivilegedMode: true,
-        // EnvironmentVariables: [
-            // {
-            //     Name: "NPM_TOKEN_READ_ONLY",
-            //     Type: "SECRETS_MANAGER",
-            //     Value: "NpmTokenReadOnlySecret:NPM_TOKEN_READ_ONLY"
-            // }
-        // ],
+        EnvironmentVariables: [
+            {
+                Name: "NPM_TOKEN_READ_ONLY",
+                Type: "SECRETS_MANAGER",
+                Value: "NpmTokenReadOnlySecret:NPM_TOKEN_READ_ONLY"
+            }
+        ],
         // InstallCommands: [
         //     "nohup /usr/local/bin/dockerd --host=unix:///var/run/docker.sock " +
         //         "-host=tcp://127.0.0.1:2375 --storage-driver=overlay2 &",
@@ -46,13 +46,13 @@ module.exports = cf.merge(
             "docker build -t ${AWS::StackName}:" +
             "${!CODEBUILD_RESOLVED_SOURCE_VERSION} .)"
         )],
-        // ServiceRoleStatements: [
-        //     {
-        //         Sid: "NpmTokenSecretStatement",
-        //         Effect: "Allow",
-        //         Action: "secretsmanager:GetSecretValue",
-        //         Resource: "arn:aws:secretsmanager:us-east-2:510666016636:secret:NpmTokenReadOnlySecret-KOrg9f"
-        //     }
-        // ]
+        ServiceRoleStatements: [
+            {
+                Sid: "NpmTokenSecretStatement",
+                Effect: "Allow",
+                Action: "secretsmanager:GetSecretValue",
+                Resource: "arn:aws:secretsmanager:us-east-2:510666016636:secret:NpmTokenReadOnlySecret-KOrg9f"
+            }
+        ]
     })
 )
