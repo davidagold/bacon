@@ -41,11 +41,12 @@ module.exports = cf.merge(
         //         "-host=tcp://127.0.0.1:2375 --storage-driver=overlay2 &",
         //     "timeout 15 sh -c \"until docker info; do echo .; sleep 1; done\""
         // ],
-        BuildCommands: [( 
+        BuildCommands: [
             "(cd airflow && " +
-            "docker build -t ${AWS::StackName}:" +
-            "${!CODEBUILD_RESOLVED_SOURCE_VERSION} .)"
-        )],
+            "docker build " +
+            "-t ${AWS::StackName}:${!CODEBUILD_RESOLVED_SOURCE_VERSION} " +
+            "--build-arg NPM_TOKEN=${!NPM_TOKEN_READ_ONLY} .)"
+        ],
         ServiceRoleStatements: [
             {
                 Sid: "NpmTokenSecretStatement",
