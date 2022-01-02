@@ -4,15 +4,10 @@
         "module": "CommonJS",
         "downlevelIteration": true,
         "removeComments": true,
-        "outDir": "./dist",
         "allowJs": true,
         "moduleResolution": "node",
         "rootDir": "./"
     },
-    "include": [
-        "src/**/*", 
-        "cloudformation/**/*"
-    ],
     "exclude": ["node_modules"]
 }
   

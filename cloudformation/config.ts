@@ -38,19 +38,19 @@ export interface Config {
 const defaultWebserverConfig: ContainerConfig = {
     name: "WebserverContainer",
     containerPort: 8080,
-    entryPoint: "/webserver_entry.sh"
+    entryPoint: "/bootstrap/webserver.sh"
 }
 
 const defaultSchedulerConfig: ContainerConfig = {
     name: "SchedulerContainer",
     containerPort: 8081,
-    entryPoint: "/scheduler_entry.sh"
+    entryPoint: "/bootstrap/scheduler.sh"
 }
 
 const defaultWorkerConfig: ContainerConfig = {
     name: "WorkerContainer",
     containerPort: 8082,
-    entryPoint: "/worker_entry.sh"
+    entryPoint: "/bootstrap/worker.sh"
 }
 
 // let createWorkerPool = new CfnParameter(this, "CreateWorkerPool", {
