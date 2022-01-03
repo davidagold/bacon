@@ -13,15 +13,11 @@ RUN apt-get update && apt-get install -y python3-pip \
 RUN python3 -m pip install --upgrade pip
 
 RUN python3 -m pip install awscli
-RUN export PATH=~/.local/bin:$PATH; \
+RUN export PATH=~/.local/bin:$PATH && \
     aws --version
 
 COPY ./bootstrap/* /bootstrap/
 
-RUN chown -R airflow: ${AIRFLOW_HOME}
-
-EXPOSE 8080
-
+EXPOSE 8080-8082
+RUN chown -R airflow: ${AIRFLOW_HOME} /bootstrap
 USER airflow
-
-RUN python3 -m pip install --user argcomplete pycurl concurrent-log-handler
