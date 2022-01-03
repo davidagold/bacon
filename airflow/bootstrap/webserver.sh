@@ -1,4 +1,4 @@
-   #!/usr/bin/env bash
+#!/usr/bin/env bash
 
 set -Eeuxo pipefail
 airflow db init
