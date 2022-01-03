@@ -8,38 +8,38 @@ import { SubnetType } from "aws-cdk-lib/aws-ec2";
 
 
 class Bacon extends cdk.Stack {
-	
-	constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
-		super(scope, id, props);
-		cdk.Tags.of(scope).add("Stack", cdk.Aws.STACK_NAME);
+    
+    constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
+        super(scope, id, props);
+        cdk.Tags.of(scope).add("Stack", cdk.Aws.STACK_NAME);
 
-		let vpc = new ec2.Vpc(this, 'Vpc', { 
-			maxAzs: 2,
-			natGateways: 0,
-			// subnetConfiguration: [
-			// 	{
-			// 		name: "public",
-			// 		subnetType: SubnetType.PUBLIC,
-			// 		cidrMask: 24,
-			// 		mapPublicIpOnLaunch: true
-			// 	}
-			// ]
-		});
-		let cluster = new ecs.Cluster(this, 'ECSCluster', { vpc: vpc });
-		let defaultVpcSecurityGroup = new ec2.SecurityGroup(
-			this, "SecurityGroup", { vpc: vpc }
-		);
-	
-		new Airflow(this, "AirflowService", {
-			cluster: cluster,
-			vpc: vpc,
-			defaultVpcSecurityGroup: defaultVpcSecurityGroup,
-			subnets: vpc.publicSubnets
-		});
-	}
+        let vpc = new ec2.Vpc(this, 'Vpc', { 
+            maxAzs: 2,
+            natGateways: 0,
+            // subnetConfiguration: [
+            // 	{
+            // 		name: "public",
+            // 		subnetType: SubnetType.PUBLIC,
+            // 		cidrMask: 24,
+            // 		mapPublicIpOnLaunch: true
+            // 	}
+            // ]
+        });
+        let cluster = new ecs.Cluster(this, 'ECSCluster', { vpc: vpc });
+        let defaultVpcSecurityGroup = new ec2.SecurityGroup(
+            this, "SecurityGroup", { vpc: vpc }
+        );
+    
+        new Airflow(this, "AirflowService", {
+            cluster: cluster,
+            vpc: vpc,
+            defaultVpcSecurityGroup: defaultVpcSecurityGroup,
+            subnets: vpc.publicSubnets
+        });
+    }
 }
 
 
 module.exports = Template
-	.fromStack(new Bacon(new cdk.App(), 'Bacon'))
-	.toJSON()
+    .fromStack(new Bacon(new cdk.App(), 'Bacon'))
+    .toJSON()
