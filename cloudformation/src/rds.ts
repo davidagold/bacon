@@ -66,7 +66,7 @@ export class Rds extends Construct {
 		instanceIdentifier: config.rds.dbName,
 		vpc: props.vpc,
 		securityGroups: [props.defaultVpcSecurityGroup],
-		vpcSubnets: { subnetType: SubnetType.PRIVATE_WITH_NAT },
+		vpcSubnets: { subnetType: SubnetType.PRIVATE_ISOLATED },
 		storageEncrypted: true,
 		multiAz: false,
 		autoMinorVersionUpgrade: false,

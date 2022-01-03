@@ -57,23 +57,18 @@ export class Service extends Construct {
         }
         else {
             // Load Balancer DNS Name will be used to access Airflow UI
-            this.loadBalancerDnsName = new CfnOutput(this, 
-                'LoadBalanceDNSName', 
+            this.loadBalancerDnsName = new CfnOutput(this, 'LoadBalancerDNSName', 
                 { value: this.attachLoadBalancer(options.vpc) }
             );
         }
     }
 
     private attachLoadBalancer(vpc: IVpc): string {
-        let loadBalancer = new elbv2.NetworkLoadBalancer(
-            this,
-            "NetworkLoadBalancer",
-            {
+        let loadBalancer = new elbv2.NetworkLoadBalancer(this, "NetworkLoadBalancer", {
             vpc: vpc,
             internetFacing: true,
             crossZoneEnabled: true
-            }
-        );
+        });
 
         const listener = loadBalancer
             .addListener("Listener", { port: 80 });

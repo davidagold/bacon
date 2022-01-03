@@ -28,6 +28,6 @@ class Bacon extends cdk.Stack {
 }
 
 
-export default Template
+module.exports = Template
 	.fromStack(new Bacon(new cdk.App(), 'Bacon'))
 	.toJSON()

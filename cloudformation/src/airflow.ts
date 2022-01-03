@@ -2,9 +2,11 @@ import { CfnOutput } from "aws-cdk-lib";
 import { Construct } from 'constructs';
 import { IVpc } from "aws-cdk-lib/aws-ec2";
 
+import { Fn, Aws } from "aws-cdk-lib";
 import ecs = require('aws-cdk-lib/aws-ecs');
 import ec2 = require("aws-cdk-lib/aws-ec2");
-import { DockerImageAsset } from 'aws-cdk-lib/aws-ecr-assets';
+import ecr = require("aws-cdk-lib/aws-ecr")
+import { DockerImage } from 'aws-cdk-lib';
 import { FargateTaskDefinition } from 'aws-cdk-lib/aws-ecs';
 
 import { config, ContainerConfig } from "../config";
@@ -48,11 +50,6 @@ export class Airflow extends Construct {
             logRetention: config.airflow.logRetention
         });
 
-        // Build Airflow docker image from Dockerfile
-        const airflowImageAsset = new DockerImageAsset(this, 'AirflowBuildImage', {
-            directory : './airflow',
-        });
-
         const airflowTask = new FargateTaskDefinition(this, 'AirflowTask', {
             cpu: config.airflow.cpu,
             memoryLimitMiB: config.airflow.memoryLimitMiB
@@ -66,24 +63,41 @@ export class Airflow extends Construct {
             });
         }
 
-        let taskMap = new Map()
+        let airflowImageRepo = ecr.Repository.fromRepositoryAttributes(
+            this, "AirflowImageRepository", {
+                repositoryArn: Fn.importValue(
+                    Fn.join("-", [
+                        Aws.STACK_NAME,
+                        "images",
+                        "AirflowImageRepositoryArn"
+                    ])
+                ),
+                repositoryName: Fn.join(
+                    "-", [Aws.STACK_NAME, "images", "airflow"]
+                )
+            }
+        )
+        let airflowImage = ecs.ContainerImage.fromEcrRepository(
+            airflowImageRepo, "latest"
+        )
+
+        new Map()
             .set("webserver", airflowTask)
             .set("scheduler", airflowTask)
-            .set("worker", workerTask);
-
-        for (let [taskName, task] of taskMap.entries()) {
-            let cConfig = config.airflow[taskName] as ContainerConfig
-            task.addContainer(cConfig.name, {
-                image: ecs.ContainerImage.fromDockerImageAsset(airflowImageAsset),
-                logging: logging,
-                environment: env,
-                entryPoint: [cConfig.entryPoint],
-                cpu: cConfig.cpu,
-                memoryLimitMiB: cConfig.cpu
-            }).addPortMappings({
-                containerPort: cConfig.containerPort
-            });
-        }
+            .set("worker", workerTask)
+            .forEach((task, taskName) => {
+                let cConfig = config.airflow[taskName] as ContainerConfig
+                task.addContainer(cConfig.name, {
+                    image: airflowImage,
+                    logging: logging,
+                    environment: env,
+                    entryPoint: [cConfig.entryPoint],
+                    cpu: cConfig.cpu,
+                    memoryLimitMiB: cConfig.cpu
+                }).addPortMappings({
+                    containerPort: cConfig.containerPort
+                });
+            })
 
         new Service(this, "AirflowService", {
             cluster: props.cluster,

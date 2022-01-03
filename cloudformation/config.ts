@@ -82,7 +82,7 @@ export const config: Config = {
         dbName: "bacon",
         port: 5432,
         masterUsername: "airflow",
-        instanceType: InstanceType.of(InstanceClass.T2, InstanceSize.SMALL),
+        instanceType: InstanceType.of(InstanceClass.T4G, InstanceSize.SMALL),
         allocatedStorageInGB: 25,
         backupRetentionInDays: 30
     }
