@@ -4,6 +4,7 @@ import ec2 = require('aws-cdk-lib/aws-ec2');
 import ecs = require('aws-cdk-lib/aws-ecs');
 import cdk = require('aws-cdk-lib');
 import { Airflow } from "./src/airflow";
+import { SubnetType } from "aws-cdk-lib/aws-ec2";
 
 
 class Bacon extends cdk.Stack {
@@ -12,7 +13,18 @@ class Bacon extends cdk.Stack {
 		super(scope, id, props);
 		cdk.Tags.of(scope).add("Stack", cdk.Aws.STACK_NAME);
 
-		let vpc = new ec2.Vpc(this, 'Vpc', { maxAzs: 2 });
+		let vpc = new ec2.Vpc(this, 'Vpc', { 
+			maxAzs: 2,
+			natGateways: 0,
+			// subnetConfiguration: [
+			// 	{
+			// 		name: "public",
+			// 		subnetType: SubnetType.PUBLIC,
+			// 		cidrMask: 24,
+			// 		mapPublicIpOnLaunch: true
+			// 	}
+			// ]
+		});
 		let cluster = new ecs.Cluster(this, 'ECSCluster', { vpc: vpc });
 		let defaultVpcSecurityGroup = new ec2.SecurityGroup(
 			this, "SecurityGroup", { vpc: vpc }
@@ -22,7 +34,7 @@ class Bacon extends cdk.Stack {
 			cluster: cluster,
 			vpc: vpc,
 			defaultVpcSecurityGroup: defaultVpcSecurityGroup,
-			privateSubnets: vpc.privateSubnets
+			subnets: vpc.publicSubnets
 		});
 	}
 }

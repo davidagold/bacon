@@ -13,17 +13,17 @@ import { config, ContainerConfig } from "../config";
 import { Service } from "./service";
 import { Rds } from "./rds"
 import { v4 as uuidv4 } from 'uuid';
+import { Secret } from "aws-cdk-lib/aws-secretsmanager";
 
 
 export interface AirflowProps {
   readonly vpc: IVpc;
   readonly cluster: ecs.ICluster;
   readonly defaultVpcSecurityGroup: ec2.ISecurityGroup;
-  readonly privateSubnets: ec2.ISubnet[];
+  readonly subnets: ec2.ISubnet[];
 }
 
 export class Airflow extends Construct {
-    public readonly adminPasswordOutput?: CfnOutput;
 
     constructor(parent: Construct, name: string, props: AirflowProps) {
         super(parent, name);
@@ -32,7 +32,31 @@ export class Airflow extends Construct {
 			defaultVpcSecurityGroup: props.defaultVpcSecurityGroup,
 			vpc: props.vpc
 		});
-        const adminPassword = uuidv4();
+        
+        const adminPasswordSecret = new Secret(
+            this, "AirflowAdminPasswordSecret", {
+                secretName: Fn.join(
+                    "-", [Aws.STACK_NAME, "AirflowAdminPasswordSecret"]
+                ),
+                generateSecretString: {
+                    secretStringTemplate: JSON.stringify({
+                        username: "admin"
+                    }),
+                    generateStringKey: "password",
+                    excludeUppercase: false,
+                    requireEachIncludedType: false,
+                    includeSpace: false,
+                    excludePunctuation: true,
+                    excludeLowercase: false,
+                    excludeNumbers: false,
+                    passwordLength: 16
+                }
+            }
+        )
+        let adminPassword = adminPasswordSecret
+            .secretValueFromJson("password")
+            .toString()
+
         const env = {
             AIRFLOW__CORE__SQL_ALCHEMY_CONN: rds.dbConnection,
             AIRFLOW__CELERY__BROKER_URL: "sqs://",
@@ -42,11 +66,11 @@ export class Airflow extends Construct {
             ADMIN_PASS: adminPassword,
             CLUSTER: props.cluster.clusterName,
             SECURITY_GROUP: props.defaultVpcSecurityGroup.securityGroupId,
-            SUBNETS: props.privateSubnets.map(subnet => subnet.subnetId).join(",")
+            SUBNETS: props.subnets.map(subnet => subnet.subnetId).join(",")
         };
 
         const logging = new ecs.AwsLogDriver({
-            streamPrefix: 'FarFlowLogging',
+            streamPrefix: 'BaconLogging',
             logRetention: config.airflow.logRetention
         });
 
@@ -104,7 +128,8 @@ export class Airflow extends Construct {
             defaultVpcSecurityGroup: props.defaultVpcSecurityGroup,
             vpc: props.vpc,
             taskDefinition: airflowTask,
-            isWorkerService: false
+            attachLoadBalancer: true,
+            rds: rds
         });
 
         if (config.airflow.createWorkerPool) {
@@ -113,11 +138,12 @@ export class Airflow extends Construct {
                 defaultVpcSecurityGroup: props.defaultVpcSecurityGroup,
                 vpc: props.vpc,
                 taskDefinition: workerTask,
-                isWorkerService: true
+                attachLoadBalancer: false,
+                rds: rds
             });
         }
 
-        this.adminPasswordOutput = new CfnOutput(this, 'AdminPassword', {
+        new CfnOutput(this, 'AdminPassword', {
             value: adminPassword
         });
     }
