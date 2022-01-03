@@ -61,9 +61,8 @@ export class Service extends Construct {
             })
         });
 
-        props.rds.rdsInstance.connections.allowFrom(
-            this.fargateService, tcpPortRange(5432, 5432)
-        )
+        props.rds.rdsInstance.connections
+            .allowFrom(this.fargateService, tcpPortRange(5432, 5432))
         
         if (props.attachLoadBalancer) {
             let allowedPorts = tcpPortRange(0, 65535)

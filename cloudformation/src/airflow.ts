@@ -12,7 +12,6 @@ import { FargateTaskDefinition } from 'aws-cdk-lib/aws-ecs';
 import { config, ContainerConfig } from "../config";
 import { Service } from "./service";
 import { Rds } from "./rds"
-import { v4 as uuidv4 } from 'uuid';
 import { Secret } from "aws-cdk-lib/aws-secretsmanager";
 
 
@@ -29,9 +28,9 @@ export class Airflow extends Construct {
         super(parent, name);
         
         const rds = new Rds(this, "RDS-Postgres", {
-			defaultVpcSecurityGroup: props.defaultVpcSecurityGroup,
-			vpc: props.vpc
-		});
+            defaultVpcSecurityGroup: props.defaultVpcSecurityGroup,
+            vpc: props.vpc
+        });
         
         const adminPasswordSecret = new Secret(
             this, "AirflowAdminPasswordSecret", {

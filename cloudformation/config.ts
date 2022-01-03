@@ -53,16 +53,6 @@ const defaultWorkerConfig: ContainerConfig = {
     entryPoint: "/bootstrap/worker.sh"
 }
 
-// let createWorkerPool = new CfnParameter(this, "CreateWorkerPool", {
-//     type: "String",
-//     default: "false",
-//     allowedValues: ["true", "false"]
-// })
-
-// let shouldCreateWorkerPool = new CfnCondition(this, "ShouldCreateWorkerPool", {
-//     expression: cdk.Fn.conditionEquals(cdk.Fn.ref("CreateWorkerPool"), "true")
-// })
-
 export const config: Config = {
     airflow: {
         cpu: 2048,
