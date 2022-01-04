@@ -8,6 +8,6 @@ sleep 5
 airflow users create -r Admin -u admin -f FirstName -l LastName -p ${ADMIN_PASS} -e admin@test.com
 sleep 5
 
-sudo source /bootstrap/mount-efs.sh
+mount mount/efs
 
 airflow webserver

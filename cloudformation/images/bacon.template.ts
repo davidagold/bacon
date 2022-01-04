@@ -40,6 +40,17 @@ let airflowDockerArtifact = artifacts.docker({
             Name: "NPM_TOKEN_READ_ONLY",
             Type: "SECRETS_MANAGER",
             Value: "NpmTokenReadOnlySecret:NPM_TOKEN_READ_ONLY"
+        },
+        {
+            Name: "EFS_FILE_SYSTEM_ID",
+            Value: cf.importValue(cf.join("-", [
+                cf.select(0, cf.split("-images", cf.stackName)),
+                "EfsFileSystemId"
+            ]))
+        },
+        {
+            Name: "AWS_REGION",
+            Value: cf.region
         }
     ],
     InstallCommands: [
@@ -52,7 +63,9 @@ let airflowDockerArtifact = artifacts.docker({
         "docker build " +
         // `dockerRepo` is resolved by artifacts
         "-t ${dockerRepo}:${!CODEBUILD_RESOLVED_SOURCE_VERSION} " + 
-        "--build-arg NPM_TOKEN=${!NPM_TOKEN_READ_ONLY} .)"
+        "--build-arg NPM_TOKEN=${!NPM_TOKEN_READ_ONLY} " +
+        "--build-arg EFS_FILE_SYSTEM_ID=${!EFS_FILE_SYSTEM_ID} " +
+        "--build-arg AWS_REGION=${!AWS_REGION} .)"
     ],
     ServiceRoleStatements: [
         {
