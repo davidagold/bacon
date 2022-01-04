@@ -32,7 +32,6 @@ export class Airflow extends Construct {
             vpc: props.vpc,
             securityGroup: props.defaultVpcSecurityGroup
         })
-        sharedFS.connections.allowDefaultPortInternally()
         let volumeInfo = {
             containerPath: "/mount/efs",
             volumeName: "SharedVolume",
@@ -158,7 +157,7 @@ export class Airflow extends Construct {
                 });
             })
 
-        new Service(this, "AirflowService", {
+        let service = new Service(this, "AirflowService", {
             cluster: props.cluster,
             defaultVpcSecurityGroup: props.defaultVpcSecurityGroup,
             vpc: props.vpc,
@@ -166,6 +165,7 @@ export class Airflow extends Construct {
             attachLoadBalancer: true,
             rds: rds
         });
+        sharedFS.connections.allowDefaultPortFrom(service.fargateService)
 
         if (config.airflow.createWorkerPool) {
             new Service(this, "WorkerService", {

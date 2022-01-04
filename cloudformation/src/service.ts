@@ -31,7 +31,7 @@ function tcpPortRange(fromPort: number, toPort: number): ec2.Port {
 }
 
 export class Service extends Construct {
-    private readonly fargateService: ecs.FargateService;
+    readonly fargateService: ecs.FargateService;
     private readonly loadBalancer?: elbv2.ApplicationLoadBalancer
 
     constructor(parent: Construct, id: string, props: ServiceProps) {
