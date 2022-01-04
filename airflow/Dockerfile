@@ -26,7 +26,7 @@ RUN chmod 777 ${efs_mount_point_1}
 
 COPY ./bootstrap/* /bootstrap/
 
-RUN chown -R airflow: ${AIRFLOW_HOME} /bootstrap
+# RUN chown -R airflow: ${AIRFLOW_HOME} /bootstrap
 # USER $AIRFLOW_USER
 
 COPY requirements.txt .
