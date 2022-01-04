@@ -8,6 +8,6 @@ sleep 5
 airflow users create -r Admin -u admin -f FirstName -l LastName -p ${ADMIN_PASS} -e admin@test.com
 sleep 5
 
-mount -a -t efs,nfs4 defaults
+mount mount/efs
 
 airflow webserver
