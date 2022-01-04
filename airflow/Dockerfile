@@ -20,8 +20,8 @@ ARG AWS_REGION
 ARG EFS_FILE_SYSTEM_ID
 ENV efs_mount_point_1=/mount/efs
 RUN mkdir -p ${efs_mount_point_1}
-RUN echo "${EFS_FILE_SYSTEM_ID}.efs.${AWS_REGION}.amazonaws.com:/ ${efs_mount_point_1} nfs4 nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport,${AIRFLOW_USER} 0 0" >> /etc/fstab
-RUN echo "/etc/fstab\n" && cat /etc/fstab | echo 
+RUN test -f /sbin/mount.efs && echo ${EFS_FILE_SYSTEM_ID}:/ ${efs_mount_point_1} efs defaults,user >> /etc/fstab || \
+    echo "${EFS_FILE_SYSTEM_ID}.efs.${AWS_REGION}.amazonaws.com:/ ${efs_mount_point_1} nfs4 nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport,user 0 0" >> /etc/fstab
 
 COPY ./bootstrap/* /bootstrap/
 
