@@ -21,6 +21,7 @@ class Bacon extends cdk.Stack {
             this, "SecurityGroup", { vpc: vpc }
         );
     
+        // new 
         new Airflow(this, "AirflowService", {
             cluster: cluster,
             vpc: vpc,

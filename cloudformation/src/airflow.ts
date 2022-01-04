@@ -5,14 +5,15 @@ import { IVpc } from "aws-cdk-lib/aws-ec2";
 import { Fn, Aws } from "aws-cdk-lib";
 import ecs = require('aws-cdk-lib/aws-ecs');
 import ec2 = require("aws-cdk-lib/aws-ec2");
-import ecr = require("aws-cdk-lib/aws-ecr")
-import { DockerImage } from 'aws-cdk-lib';
+import ecr = require("aws-cdk-lib/aws-ecr");
+import efs = require("aws-cdk-lib/aws-efs");
 import { FargateTaskDefinition } from 'aws-cdk-lib/aws-ecs';
 
 import { config, ContainerConfig } from "../config";
 import { Service } from "./service";
 import { Rds } from "./rds"
 import { Secret } from "aws-cdk-lib/aws-secretsmanager";
+import { sub } from "@mapbox/cloudfriend/lib/intrinsic";
 
 
 export interface AirflowProps {
@@ -27,6 +28,30 @@ export class Airflow extends Construct {
     constructor(parent: Construct, name: string, props: AirflowProps) {
         super(parent, name);
         
+        let sharedFS = new efs.FileSystem(this, "AirflowEfsVolume", {
+            vpc: props.vpc,
+            securityGroup: props.defaultVpcSecurityGroup
+        })
+        sharedFS.connections.allowDefaultPortInternally()
+        let volumeInfo = {
+            containerPath: "/mount/efs",
+            volumeName: "SharedVolume",
+            efsVolumeConfiguration: {
+                fileSystemId: sharedFS.fileSystemId,
+            }
+        }
+        let mountTargets = props.vpc.privateSubnets.map((subnet) => {
+            new efs.CfnMountTarget(this, "EfsMountTarget", {
+                fileSystemId: sharedFS.fileSystemId,
+                securityGroups: [props.defaultVpcSecurityGroup.securityGroupId],
+                subnetId: subnet.subnetId
+            })
+        })
+        new CfnOutput(this, "EfsFileSystemId", {
+            value: sharedFS.fileSystemId,
+            exportName: Fn.join("-", [Aws.STACK_NAME, "EfsFileSystemId"])
+        })
+
         const rds = new Rds(this, "RDS-Postgres", {
             defaultVpcSecurityGroup: props.defaultVpcSecurityGroup,
             vpc: props.vpc
@@ -64,6 +89,7 @@ export class Airflow extends Construct {
             AIRFLOW__WEBSERVER__RBAC: "True",
             ADMIN_PASS: adminPassword,
             CLUSTER: props.cluster.clusterName,
+            EFS_FILE_SYSTEM_ID: sharedFS.fileSystemId,
             SECURITY_GROUP: props.defaultVpcSecurityGroup.securityGroupId,
             SUBNETS: props.subnets.map(subnet => subnet.subnetId).join(",")
         };
@@ -75,16 +101,20 @@ export class Airflow extends Construct {
 
         const airflowTask = new FargateTaskDefinition(this, 'AirflowTask', {
             cpu: config.airflow.cpu,
-            memoryLimitMiB: config.airflow.memoryLimitMiB
+            memoryLimitMiB: config.airflow.memoryLimitMiB,
+            volumes: [{
+                name: volumeInfo.volumeName,
+                efsVolumeConfiguration: volumeInfo.efsVolumeConfiguration
+            }]
         });
 
         let workerTask = airflowTask;
-        if (config.airflow.createWorkerPool) {
-            workerTask = new FargateTaskDefinition(this, 'WorkerTask', {
-                cpu: config.airflow.cpu,
-                memoryLimitMiB: config.airflow.memoryLimitMiB
-            });
-        }
+        // if (config.airflow.createWorkerPool) {
+        //     workerTask = new FargateTaskDefinition(this, 'WorkerTask', {
+        //         cpu: config.airflow.cpu,
+        //         memoryLimitMiB: config.airflow.memoryLimitMiB
+        //     });
+        // }
 
         let airflowImageRepo = ecr.Repository.fromRepositoryAttributes(
             this, "AirflowImageRepository", {
@@ -108,16 +138,22 @@ export class Airflow extends Construct {
             .set("webserver", airflowTask)
             .set("scheduler", airflowTask)
             .set("worker", workerTask)
-            .forEach((task, taskName) => {
+            .forEach((task: ecs.FargateTaskDefinition, taskName: string) => {
                 let cConfig = config.airflow[taskName] as ContainerConfig
-                task.addContainer(cConfig.name, {
+                let container = task.addContainer(cConfig.name, {
                     image: airflowImage,
                     logging: logging,
                     environment: env,
                     entryPoint: [cConfig.entryPoint],
                     cpu: cConfig.cpu,
                     memoryLimitMiB: cConfig.cpu
-                }).addPortMappings({
+                })
+                container.addMountPoints({
+                    containerPath: volumeInfo.containerPath,
+                    sourceVolume: volumeInfo.volumeName,
+                    readOnly: false
+                })
+                container.addPortMappings({
                     containerPort: cConfig.containerPort
                 });
             })
@@ -141,9 +177,5 @@ export class Airflow extends Construct {
                 rds: rds
             });
         }
-
-        new CfnOutput(this, 'AdminPassword', {
-            value: adminPassword
-        });
     }
 }
