@@ -14,6 +14,7 @@ import { Service } from "./service";
 import { Rds } from "./rds"
 import { Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { sub } from "@mapbox/cloudfriend/lib/intrinsic";
+import { Effect, PolicyStatement } from "aws-cdk-lib/aws-iam";
 
 
 export interface AirflowProps {
@@ -105,7 +106,7 @@ export class Airflow extends Construct {
             volumes: [{
                 name: volumeInfo.volumeName,
                 efsVolumeConfiguration: volumeInfo.efsVolumeConfiguration
-            }]
+            }],
         });
 
         let workerTask = airflowTask;
@@ -156,6 +157,11 @@ export class Airflow extends Construct {
                 container.addPortMappings({
                     containerPort: cConfig.containerPort
                 });
+                container.addToExecutionPolicy(new PolicyStatement({
+                    effect: Effect.ALLOW,
+                    actions: ["elasticfilesystem:ClientMount"],
+                    resources: [sharedFS.fileSystemArn]
+                }))
             })
 
         let service = new Service(this, "AirflowService", {
