@@ -81,6 +81,7 @@ export class Airflow extends Construct {
             .toString()
 
         const env = {
+            AWS_REGION: Aws.REGION,
             AIRFLOW__CORE__SQL_ALCHEMY_CONN: rds.dbConnection,
             AIRFLOW__CELERY__BROKER_URL: "sqs://",
             AIRFLOW__CELERY__RESULT_BACKEND: "db+" + rds.dbConnection,

@@ -18,15 +18,15 @@ RUN apt-get -y install git binutils nfs-common && \
 
 ARG AWS_REGION
 ARG EFS_FILE_SYSTEM_ID
-ENV EFS_FILE_SYSTEM_ID=${EFS_FILE_SYSTEM_ID}
 ENV efs_mount_point_1=/mount/efs
 RUN mkdir -p ${efs_mount_point_1}
 RUN test -f /sbin/mount.efs && echo ${EFS_FILE_SYSTEM_ID}:/ ${efs_mount_point_1} efs defaults,user,_netdev >> /etc/fstab || \
     echo "${EFS_FILE_SYSTEM_ID}.efs.${AWS_REGION}.amazonaws.com:/ ${efs_mount_point_1} nfs4 nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport,user,_netdev 0 0" >> /etc/fstab
-# RUN echo "${EFS_FILE_SYSTEM_ID}.efs.${AWS_REGION}.amazonaws.com:/ ${efs_mount_point_1} nfs4 nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport,user,_netdev 0 0" >> /etc/fstab
 RUN chmod 777 -R ${efs_mount_point_1}
 
 COPY ./bootstrap/* /bootstrap/
+RUN apt-get install -y crudini && \
+    source /bootstrap/configure-efs-utils.sh
 
 RUN chown -R ${AIRFLOW_USER}: ${AIRFLOW_HOME} /bootstrap
 # USER ${AIRFLOW_USER}
