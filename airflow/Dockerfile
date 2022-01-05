@@ -28,8 +28,11 @@ COPY ./bootstrap/* /bootstrap/
 RUN apt-get install -y crudini && \
     source /bootstrap/configure-efs-utils.sh
 
+# Let user `airflow` run mount
+RUN echo "airflow ALL = NOPASSWD: /bin/mount" | sudo EDITOR='tee -a' visudo
+
 RUN chown -R ${AIRFLOW_USER}: ${AIRFLOW_HOME} /bootstrap
-# USER ${AIRFLOW_USER}
+USER ${AIRFLOW_USER}
 
 COPY requirements.txt .
 RUN python3 -m pip install --upgrade pip
