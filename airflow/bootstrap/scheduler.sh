@@ -2,4 +2,4 @@
 
 set -Eeuxo pipefail
 sleep 30
-airflow scheduler
+# airflow scheduler

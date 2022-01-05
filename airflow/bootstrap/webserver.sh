@@ -2,12 +2,12 @@
 
 set -Eeuxo pipefail
 
-airflow db init
-sleep 5
+# airflow db init
+# sleep 5
 
-airflow users create -r Admin -u admin -f FirstName -l LastName -p ${ADMIN_PASS} -e admin@test.com
-sleep 5
+# airflow users create -r Admin -u admin -f FirstName -l LastName -p ${ADMIN_PASS} -e admin@test.com
+# sleep 5
 
-mount mount/efs
+sudo mount -t efs ${EFS_FILE_SYSTEM_ID}:/ /mount/efs
 
-airflow webserver
+# airflow webserver
