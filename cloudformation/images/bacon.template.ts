@@ -1,3 +1,5 @@
+import { config } from "../config"
+
 const cf = require('@mapbox/cloudfriend')
 const artifacts = require("@davidagold/artifacts")
 
@@ -51,6 +53,10 @@ let airflowDockerArtifact = artifacts.docker({
         {
             Name: "AWS_REGION",
             Value: cf.region
+        },
+        {
+            Name: "MOUNT_POINT",
+            Value: config.airflow.efsMountPoint
         }
     ],
     InstallCommands: [
@@ -65,6 +71,7 @@ let airflowDockerArtifact = artifacts.docker({
         "-t ${dockerRepo}:${!CODEBUILD_RESOLVED_SOURCE_VERSION} " + 
         "--build-arg NPM_TOKEN=${!NPM_TOKEN_READ_ONLY} " +
         "--build-arg EFS_FILE_SYSTEM_ID=${!EFS_FILE_SYSTEM_ID} " +
+        "--build-arg MOUNT_POINT=${!MOUNT_POINT} " +
         "--build-arg AWS_REGION=${!AWS_REGION} .)"
     ],
     ServiceRoleStatements: [

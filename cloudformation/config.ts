@@ -12,6 +12,7 @@ export interface AirflowTaskConfig {
     readonly worker: ContainerConfig;
     readonly logRetention: RetentionDays;
     readonly createWorkerPool?: boolean;
+    readonly efsMountPoint?: string; 
 }
 
 export interface AutoScalingConfig {
@@ -61,7 +62,8 @@ export const config: Config = {
         scheduler: defaultSchedulerConfig,
         worker: defaultWorkerConfig,
         logRetention: RetentionDays.ONE_MONTH,
-        createWorkerPool: false
+        createWorkerPool: false,
+        efsMountPoint: "/mount/efs"
     },
     workerAutoScaling: {
         minTaskCount: 1,

@@ -34,7 +34,7 @@ export class Airflow extends Construct {
             securityGroup: props.defaultVpcSecurityGroup
         })
         let volumeInfo = {
-            containerPath: "/mount/efs",
+            containerPath: config.airflow.efsMountPoint,
             volumeName: "SharedVolume",
             efsVolumeConfiguration: {
                 fileSystemId: sharedFS.fileSystemId,
@@ -91,6 +91,7 @@ export class Airflow extends Construct {
             ADMIN_PASS: adminPassword,
             CLUSTER: props.cluster.clusterName,
             EFS_FILE_SYSTEM_ID: sharedFS.fileSystemId,
+            MOUNT_POINT: config.airflow.efsMountPoint,
             SECURITY_GROUP: props.defaultVpcSecurityGroup.securityGroupId,
             SUBNETS: props.subnets.map(subnet => subnet.subnetId).join(",")
         };
