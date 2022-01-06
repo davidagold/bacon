@@ -40,6 +40,4 @@ RUN python3 -m pip install -r requirements.txt
 RUN export PATH=~/.local/bin:$PATH && \
     aws --version
 
-EXPOSE 2049
-EXPOSE 5432
 EXPOSE 8080-8082
