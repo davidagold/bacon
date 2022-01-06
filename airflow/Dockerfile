@@ -27,7 +27,6 @@ RUN chmod 777 -R ${MOUNT_POINT}
 COPY ./bootstrap/* /bootstrap/
 RUN apt-get install -y crudini && \
     source /bootstrap/configure-efs-utils.sh
-RUN echo "/mount/efs *(rw,fsid=0,sync)" >> /etc/exports
 
 # Let user `airflow` run mount
 RUN echo "airflow ALL = NOPASSWD: /bin/mount" | sudo EDITOR='tee -a' visudo
@@ -41,4 +40,6 @@ RUN python3 -m pip install -r requirements.txt
 RUN export PATH=~/.local/bin:$PATH && \
     aws --version
 
+EXPOSE 2049
+EXPOSE 5432
 EXPOSE 8080-8082

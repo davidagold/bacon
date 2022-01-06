@@ -1,6 +1,6 @@
 import { CfnOutput } from "aws-cdk-lib";
 import { Construct } from 'constructs';
-import { IVpc } from "aws-cdk-lib/aws-ec2";
+import { IVpc, SecurityGroup } from "aws-cdk-lib/aws-ec2";
 
 import { Fn, Aws } from "aws-cdk-lib";
 import ecs = require('aws-cdk-lib/aws-ecs');
@@ -29,9 +29,23 @@ export class Airflow extends Construct {
     constructor(parent: Construct, name: string, props: AirflowProps) {
         super(parent, name);
         
+        let efsSecurityGroup = new ec2.SecurityGroup(this, "EfsSecurityGroup", {
+            vpc: props.vpc
+        })
         let sharedFS = new efs.FileSystem(this, "AirflowEfsVolume", {
             vpc: props.vpc,
-            securityGroup: props.defaultVpcSecurityGroup
+            securityGroup: efsSecurityGroup
+        })
+        props.vpc.privateSubnets.forEach((subnet) => {
+            new efs.CfnMountTarget(this, "EfsMountTarget", {
+                fileSystemId: sharedFS.fileSystemId,
+                securityGroups: [efsSecurityGroup.securityGroupId],
+                subnetId: subnet.subnetId
+            })
+        })
+        new CfnOutput(this, "EfsFileSystemId", {
+            value: sharedFS.fileSystemId,
+            exportName: Fn.join("-", [Aws.STACK_NAME, "EfsFileSystemId"])
         })
         let volumeInfo = {
             containerPath: config.airflow.efsMountPoint,
@@ -40,17 +54,6 @@ export class Airflow extends Construct {
                 fileSystemId: sharedFS.fileSystemId,
             }
         }
-        let mountTargets = props.vpc.privateSubnets.map((subnet) => {
-            new efs.CfnMountTarget(this, "EfsMountTarget", {
-                fileSystemId: sharedFS.fileSystemId,
-                securityGroups: [props.defaultVpcSecurityGroup.securityGroupId],
-                subnetId: subnet.subnetId
-            })
-        })
-        new CfnOutput(this, "EfsFileSystemId", {
-            value: sharedFS.fileSystemId,
-            exportName: Fn.join("-", [Aws.STACK_NAME, "EfsFileSystemId"])
-        })
 
         const rds = new Rds(this, "RDS-Postgres", {
             defaultVpcSecurityGroup: props.defaultVpcSecurityGroup,
