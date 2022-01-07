@@ -14,6 +14,8 @@ airflow users create -r Admin -u admin -f FirstName -l LastName -p ${ADMIN_PASS}
 #     ${EFS_FILE_SYSTEM_ID}.efs.${AWS_REGION}.amazonaws.com:/ \
 #     ${MOUNT_POINT}
 
-sudo mount -t efs ${EFS_FILE_SYSTEM_ID}:/ /mount/efs
+# sudo mount -t efs ${EFS_FILE_SYSTEM_ID}:/ /mount/efs
+
+df -T
 
 airflow webserver

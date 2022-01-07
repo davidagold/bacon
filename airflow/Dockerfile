@@ -10,11 +10,11 @@ RUN apt-get update && apt-get install -y python3-pip \
     libcurl4-gnutls-dev \
     librtmp-dev
 
-RUN apt-get -y install git binutils nfs-common && \
-    git clone https://github.com/aws/efs-utils /tmp/efs-utils && \
-    (cd /tmp/efs-utils && \
-        ./build-deb.sh && \ 
-        apt-get -y install ./build/amazon-efs-utils*deb)
+RUN apt-get -y install git binutils nfs-common
+    # git clone https://github.com/aws/efs-utils /tmp/efs-utils && \
+    # (cd /tmp/efs-utils && \
+    #     ./build-deb.sh && \
+    #     apt-get -y install ./build/amazon-efs-utils*deb)
 
 ARG AWS_REGION
 ARG EFS_FILE_SYSTEM_ID
