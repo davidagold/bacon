@@ -3,3 +3,4 @@ psycopg2-binary==2.9.3
 pycurl==7.44.1
 argcomplete==2.0.0
 concurrent-log-handler==0.9.19
+plyvel==1.4.0
