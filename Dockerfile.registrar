@@ -1,0 +1,18 @@
+FROM debian:buster
+
+USER root
+
+RUN apt update && apt updgrade -y && apt install -y curl
+RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash - && \
+    apt-get install -y nodejs
+
+USER registrar
+WORKDIR /usr/local/
+COPY package* .
+RUN npm install
+
+COPY tsconfig .
+COPY src .
+RUN npm run build:registrar
+
+ENTRYPOINT [ "/usr/local/dist/main.js" ]

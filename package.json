@@ -7,6 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:cfn": "node_modules/typescript/bin/tsc -p ./tsconfig/cloudformation.json",
     "build:src": "node_modules/typescript/bin/tsc -p ./tsconfig/src.json",
+    "build:registrar": "node_modules/typescript/bin/tsc -p ./tsconfig/registrar.json",
     "build": "npm run build:cfn && npm run build:src"
   },
   "repository": {
