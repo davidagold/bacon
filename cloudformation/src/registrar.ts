@@ -27,7 +27,7 @@ class Registrar extends Construct {
 
         this.registrarFn = new lambda.Function(this, "RegistrarFunction", {
             code: lambda.Code.fromEcrImage(
-                registrarImageRepo, { tag: "latest"}
+                registrarImageRepo, { tag: "latest" }
             ),
             runtime: lambda.Runtime.FROM_IMAGE,
             handler: lambda.Handler.FROM_IMAGE
