@@ -2,3 +2,4 @@ node_modules
 dist
 cloudformation/**/*.js
 venv
+src/**/*.js

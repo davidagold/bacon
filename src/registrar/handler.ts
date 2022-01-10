@@ -11,7 +11,7 @@ interface BaconEvent {
     config: string
 }
 
-exports.handler = async (event: BaconEvent) => {
+exports.main = async (event: BaconEvent) => {
     if (event.experimentType === "SWEEP") {
         let configDir = path.join(SWEEPS_DIR, event.experimentId)
         console.log("Writing sweep config")
