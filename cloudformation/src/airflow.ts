@@ -9,7 +9,7 @@ import ecr = require("aws-cdk-lib/aws-ecr");
 import efs = require("aws-cdk-lib/aws-efs");
 import { FargateTaskDefinition } from 'aws-cdk-lib/aws-ecs';
 
-import { config, ContainerConfig } from "../config";
+import { config, ContainerConfig } from "../../src/config";
 import { Service } from "./service";
 import { Rds } from "./rds"
 import { Secret } from "aws-cdk-lib/aws-secretsmanager";

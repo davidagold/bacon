@@ -1,4 +1,4 @@
-import { config } from "../config"
+import { config } from "../../src/config"
 
 const cf = require('@mapbox/cloudfriend')
 const artifacts = require("@davidagold/artifacts")

@@ -6,7 +6,6 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build:cfn": "node_modules/typescript/bin/tsc -p ./tsconfig/cloudformation.json",
-    "build:src": "node_modules/typescript/bin/tsc -p ./tsconfig/src.json",
     "build:registrar": "node_modules/typescript/bin/tsc -p ./tsconfig/registrar.json",
     "build": "npm run build:cfn && npm run build:src"
   },
@@ -21,12 +20,14 @@
   },
   "homepage": "https://github.com/dag-org/bacon#readme",
   "dependencies": {
+    "@aws-sdk/client-efs": "^3.46.0",
     "@davidagold/artifacts": "^0.0.5",
     "@mapbox/cloudfriend": "^5.1.0",
     "aws-cdk-lib": "^2.3.0",
     "constructs": "^10.0.21",
     "js-yaml": "^4.1.0",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "yargs": "^17.3.1"
   },
   "devDependencies": {
     "@types/mocha": "^9.0.0",

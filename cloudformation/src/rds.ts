@@ -13,16 +13,7 @@ import {
     SubnetType
 } from "aws-cdk-lib/aws-ec2";
 
-import { config } from "../config";
-
-export interface RdsConfig {
-    readonly dbName: string;
-    readonly masterUsername: string;
-    readonly port: number;
-    readonly instanceType: InstanceType;
-    readonly allocatedStorageInGB: number;
-    readonly backupRetentionInDays: number;
-}
+import { config, RdsConfig } from "../../src/config";
 
 export interface RdsProps {
     readonly vpc: IVpc;

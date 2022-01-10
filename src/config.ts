@@ -1,8 +1,6 @@
-import { Rds, RdsConfig } from "./src/rds";
 import {InstanceClass, InstanceSize, InstanceType } from "aws-cdk-lib/aws-ec2";
 import { RetentionDays } from "aws-cdk-lib/aws-logs";
 import cdk = require("aws-cdk-lib")
-import { CfnCondition, CfnParameter } from "aws-cdk-lib";
 
 export interface AirflowTaskConfig {
     readonly cpu: number;
@@ -28,6 +26,15 @@ export interface ContainerConfig {
     readonly memoryLimitMiB?: number;
     readonly containerPort: number;
     readonly entryPoint: string;
+}
+
+export interface RdsConfig {
+    readonly dbName: string;
+    readonly masterUsername: string;
+    readonly port: number;
+    readonly instanceType: InstanceType;
+    readonly allocatedStorageInGB: number;
+    readonly backupRetentionInDays: number;
 }
 
 export interface Config {
