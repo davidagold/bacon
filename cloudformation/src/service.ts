@@ -4,7 +4,7 @@ import { IVpc, Vpc } from "aws-cdk-lib/aws-ec2";
 import { FargatePlatformVersion, FargateTaskDefinition } from 'aws-cdk-lib/aws-ecs';
 
 import { Policies } from "./policies";
-import { config } from "../config";
+import { config } from "../../src/config";
 import ecs = require('aws-cdk-lib/aws-ecs');
 import ec2 = require("aws-cdk-lib/aws-ec2");
 import elbv2 = require("aws-cdk-lib/aws-elasticloadbalancingv2");
