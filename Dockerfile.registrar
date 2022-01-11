@@ -8,6 +8,9 @@ COPY package* ./
 COPY tsconfig/ ./tsconfig/
 COPY src/ ./src/
 
+ARG MOUNT_POINT
+ENV MOUNT_POINT=${MOUNT_POINT}
+
 ARG NPM_TOKEN
 ENV NPM_TOKEN=${NPM_TOKEN}
 RUN echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > .npmrc

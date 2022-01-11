@@ -122,6 +122,10 @@ class RegistrarImage extends Construct {
                 type: codebuild.BuildEnvironmentVariableType.PLAINTEXT,
                 value: ecrRegistry
             },
+            MOUNT_POINT: {
+                type: codebuild.BuildEnvironmentVariableType.PLAINTEXT,
+                value: config.airflow.efsMountPoint
+            },
             TAG_COMMIT_ECR_BASE: {
                 type: codebuild.BuildEnvironmentVariableType.PLAINTEXT,
                 value: Fn.sub(tagCommitEcrBase, { ecrRegistry, dockerRepoName })
@@ -188,7 +192,7 @@ class Images extends Stack {
     constructor(scope, id, props?) {
         super(scope, id)
 
-        let dockerRepo = new Repository(this, "RegistrarDkrRepository", {
+        let dockerRepo = new Repository(this, "RegistrarDockerRepository", {
             repositoryName: Fn.join("-", [Aws.STACK_NAME, "registrar"])
         })
         new CfnOutput(this, "RegistrarDkrRepositoryArn", {
