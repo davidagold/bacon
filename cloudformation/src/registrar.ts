@@ -2,15 +2,18 @@ import lambda = require("aws-cdk-lib/aws-lambda")
 import { Aws, Fn } from "aws-cdk-lib"
 import ecr = require("aws-cdk-lib/aws-ecr")
 import efs = require("aws-cdk-lib/aws-efs")
+import ec2 = require("aws-cdk-lib/aws-ec2")
 import { Construct } from "constructs"
 import { config } from "../../src/config"
+import iam = require("aws-cdk-lib/aws-iam")
 
 
 interface RegistrarProps {
-    fileSystem: efs.FileSystem
+    readonly fileSystem: efs.FileSystem
+    readonly vpc: ec2.Vpc
 }
 
-class Registrar extends Construct {
+export class Registrar extends Construct {
     registrarFn: lambda.Function
 
     constructor(scope: Construct, id: string, props: RegistrarProps) {
@@ -44,7 +47,27 @@ class Registrar extends Construct {
             handler: lambda.Handler.FROM_IMAGE,
             filesystem: lambda.FileSystem.fromEfsAccessPoint(
                 accessPoint, config.airflow.efsMountPoint
-            )
+            ),
+            vpc: props.vpc,
+            role: new iam.Role(this, "RegistrarFnServiceRole", {
+                assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
+                inlinePolicies: {
+                    CodebuildPolicy: new iam.PolicyDocument({
+                        statements: [
+                            new iam.PolicyStatement({
+                                sid: "CloudWatchLogsStatement",
+                                effect: iam.Effect.ALLOW,
+                                actions: [
+                                    "elasticfilesystem:ClientMount",
+                                    "elasticfilesystem:ClientWrite",
+                                    "elasticfilesystem:DescribeMountTargets"
+                                ],
+                                resources: [props.fileSystem.fileSystemArn]
+                            })
+                        ]
+                    })
+                }
+            })
         })
     }    
 }

@@ -6,7 +6,7 @@ import efs = require("aws-cdk-lib/aws-efs")
 import cdk = require('aws-cdk-lib');
 import { Aws, Fn, CfnOutput } from 'aws-cdk-lib';
 import { Airflow } from "./src/airflow";
-import { SubnetType } from "aws-cdk-lib/aws-ec2";
+import { Registrar } from "./src/registrar"
 
 
 class Bacon extends cdk.Stack {
@@ -41,6 +41,8 @@ class Bacon extends cdk.Stack {
             exportName: Fn.join("-", [Aws.STACK_NAME, "EfsFileSystemId"])
         })
         
+        new Registrar(this, "Registrar", { fileSystem: sharedFs, vpc: vpc })
+
         let cluster = new ecs.Cluster(this, 'ECSCluster', { vpc: vpc });
 
         new Airflow(this, "AirflowService", {
