@@ -101,7 +101,6 @@ class RegistrarImage extends Construct {
 
         let ecrRegistry = Fn.sub("${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com")
         let dockerRepoName = props.dockerRepo.repositoryName.toString()
-        // :${!CODEBUILD_RESOLVED_SOURCE_VERSION}
 
         let tagCommitEcrBase = "${ecrRegistry}/${dockerRepoName}"
         let tagLatest = "${dockerRepoName}:latest"
@@ -189,11 +188,12 @@ class Images extends Stack {
     constructor(scope, id, props?) {
         super(scope, id)
 
-        let dockerRepo = new Repository(this, "RegistrarDockerRepository", {
+        let dockerRepo = new Repository(this, "RegistrarDkrRepository", {
             repositoryName: Fn.join("-", [Aws.STACK_NAME, "registrar"])
         })
         new CfnOutput(this, "RegistrarDkrRepositoryArn", {
-            value: dockerRepo.repositoryArn
+            value: dockerRepo.repositoryArn,
+            exportName: Fn.join("-", [Aws.STACK_NAME, "RegistrarDkrRepositoryArn"])
         })
 
         let serviceRole = new Role(this, "RegistrarProjectServiceRole", {

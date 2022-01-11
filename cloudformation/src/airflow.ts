@@ -22,6 +22,7 @@ export interface AirflowProps {
   readonly cluster: ecs.ICluster;
   readonly defaultVpcSecurityGroup: ec2.ISecurityGroup;
   readonly subnets: ec2.ISubnet[];
+  readonly fileSystem: efs.FileSystem
 }
 
 export class Airflow extends Construct {
@@ -29,29 +30,11 @@ export class Airflow extends Construct {
     constructor(parent: Construct, name: string, props: AirflowProps) {
         super(parent, name);
         
-        let efsSecurityGroup = new ec2.SecurityGroup(this, "EfsSecurityGroup", {
-            vpc: props.vpc
-        })
-        let sharedFS = new efs.FileSystem(this, "AirflowEfsVolume", {
-            vpc: props.vpc,
-            securityGroup: efsSecurityGroup
-        })
-        props.vpc.privateSubnets.forEach((subnet) => {
-            new efs.CfnMountTarget(this, "EfsMountTarget", {
-                fileSystemId: sharedFS.fileSystemId,
-                securityGroups: [efsSecurityGroup.securityGroupId],
-                subnetId: subnet.subnetId
-            })
-        })
-        new CfnOutput(this, "EfsFileSystemId", {
-            value: sharedFS.fileSystemId,
-            exportName: Fn.join("-", [Aws.STACK_NAME, "EfsFileSystemId"])
-        })
         let volumeInfo = {
             containerPath: config.airflow.efsMountPoint,
             volumeName: "SharedVolume",
             efsVolumeConfiguration: {
-                fileSystemId: sharedFS.fileSystemId,
+                fileSystemId: props.fileSystem.fileSystemId,
             }
         }
 
@@ -93,7 +76,7 @@ export class Airflow extends Construct {
             AIRFLOW__WEBSERVER__RBAC: "True",
             ADMIN_PASS: adminPassword,
             CLUSTER: props.cluster.clusterName,
-            EFS_FILE_SYSTEM_ID: sharedFS.fileSystemId,
+            EFS_FILE_SYSTEM_ID: props.fileSystem.fileSystemId,
             MOUNT_POINT: config.airflow.efsMountPoint,
             SECURITY_GROUP: props.defaultVpcSecurityGroup.securityGroupId,
             SUBNETS: props.subnets.map(subnet => subnet.subnetId).join(",")
@@ -164,7 +147,7 @@ export class Airflow extends Construct {
                 container.addToExecutionPolicy(new PolicyStatement({
                     effect: Effect.ALLOW,
                     actions: ["elasticfilesystem:ClientMount"],
-                    resources: [sharedFS.fileSystemArn]
+                    resources: [props.fileSystem.fileSystemArn]
                 }))
             })
 
@@ -176,7 +159,7 @@ export class Airflow extends Construct {
             attachLoadBalancer: true,
             rds: rds
         });
-        sharedFS.connections.allowDefaultPortFrom(service.fargateService)
+        props.fileSystem.connections.allowDefaultPortFrom(service.fargateService)
 
         if (config.airflow.createWorkerPool) {
             new Service(this, "WorkerService", {

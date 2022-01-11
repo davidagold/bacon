@@ -2,7 +2,9 @@
 import { Template } from "aws-cdk-lib/assertions";
 import ec2 = require('aws-cdk-lib/aws-ec2');
 import ecs = require('aws-cdk-lib/aws-ecs');
+import efs = require("aws-cdk-lib/aws-efs")
 import cdk = require('aws-cdk-lib');
+import { Aws, Fn, CfnOutput } from 'aws-cdk-lib';
 import { Airflow } from "./src/airflow";
 import { SubnetType } from "aws-cdk-lib/aws-ec2";
 
@@ -16,16 +18,37 @@ class Bacon extends cdk.Stack {
         let vpc = new ec2.Vpc(this, 'Vpc', { 
             maxAzs: 2, natGateways: 0
         });
-        let cluster = new ecs.Cluster(this, 'ECSCluster', { vpc: vpc });
         let defaultVpcSecurityGroup = new ec2.SecurityGroup(
             this, "SecurityGroup", { vpc: vpc }
         );
-    
+        
+        let efsSecurityGroup = new ec2.SecurityGroup(
+            this, "EfsSecurityGroup", { vpc: vpc }
+        )
+        let sharedFs = new efs.FileSystem(this, "AirflowEfsVolume", {
+            vpc: vpc,
+            securityGroup: efsSecurityGroup
+        })
+        vpc.privateSubnets.forEach((subnet) => {
+            new efs.CfnMountTarget(this, "EfsMountTarget", {
+                fileSystemId: sharedFs.fileSystemId,
+                securityGroups: [efsSecurityGroup.securityGroupId],
+                subnetId: subnet.subnetId
+            })
+        })
+        new CfnOutput(this, "EfsFileSystemId", {
+            value: sharedFs.fileSystemId,
+            exportName: Fn.join("-", [Aws.STACK_NAME, "EfsFileSystemId"])
+        })
+        
+        let cluster = new ecs.Cluster(this, 'ECSCluster', { vpc: vpc });
+
         new Airflow(this, "AirflowService", {
             cluster: cluster,
             vpc: vpc,
             defaultVpcSecurityGroup: defaultVpcSecurityGroup,
-            subnets: vpc.publicSubnets
+            subnets: vpc.publicSubnets,
+            fileSystem: sharedFs
         });
     }
 }
