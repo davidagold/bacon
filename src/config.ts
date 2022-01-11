@@ -70,7 +70,7 @@ export const config: Config = {
         worker: defaultWorkerConfig,
         logRetention: RetentionDays.ONE_MONTH,
         createWorkerPool: false,
-        efsMountPoint: "/mount/efs"
+        efsMountPoint: "/mnt/efs"
     },
     workerAutoScaling: {
         minTaskCount: 1,
