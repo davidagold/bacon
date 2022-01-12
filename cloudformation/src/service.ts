@@ -58,7 +58,8 @@ export class Service extends Construct {
             platformVersion: FargatePlatformVersion.VERSION1_4,
             vpcSubnets: props.vpc.selectSubnets({ 
                 subnetType: ec2.SubnetType.PUBLIC
-            })
+            }),
+            healthCheckGracePeriod: Duration.seconds(150) 
         });
 
         props.rds.rdsInstance.connections
@@ -83,7 +84,7 @@ export class Service extends Construct {
                     healthCheck: {
                         port: "traffic-port",
                         protocol: elbv2.Protocol.HTTP,
-                        path: "/health"
+                        path: "/health",
                     },
                     port: 80,
                     targets: [this.fargateService]
