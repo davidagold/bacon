@@ -67,12 +67,13 @@ let airflowDockerArtifact = artifacts.docker({
         "timeout 15 sh -c \"until docker info; do echo .; sleep 1; done\""
     ],
     BuildCommands: [
-        "(cd airflow && " +
         "docker build " +
         // `dockerRepo` is resolved by artifacts
+        "-f Dockerfile/airflow.dockerfile " +
         "-t ${dockerRepo}:${!CODEBUILD_RESOLVED_SOURCE_VERSION} " + 
         "--build-arg NPM_TOKEN=${!NPM_TOKEN_READ_ONLY} " +
-        "--build-arg MOUNT_POINT=${!MOUNT_POINT} .)"
+        "--build-arg MOUNT_POINT=${!MOUNT_POINT} " + 
+        "airflow"
     ],
     ServiceRoleStatements: [npmTokenReadAccessStatement]
 })
@@ -141,25 +142,26 @@ class RegistrarImage extends Construct {
             phases: {
                 install: {
                     commands: [
-                        "nohup /usr/local/bin/dockerd --host=unix:///var/run/docker.sock " +
-                            "-host=tcp://127.0.0.1:2375 --storage-driver=overlay2 &",
+                        "nohup /usr/local/bin/dockerd --host=unix:///var/run/docker.sock "
+                        + "-host=tcp://127.0.0.1:2375 --storage-driver=overlay2 &",
                         "timeout 15 sh -c \"until docker info; do echo .; sleep 1; done\""
                     ]
                   },
                   pre_build: {
                     commands : [
                         "echo Logging in to Amazon ECR...",
-                        "aws ecr get-login-password --region ${AWS_REGION} | " + 
-                            "docker login --username AWS --password-stdin " +
-                            "${ECR_REGISTRY}"
+                        "aws ecr get-login-password --region ${AWS_REGION} | "
+                        + "docker login --username AWS --password-stdin "
+                        + "${ECR_REGISTRY}"
                     ]
                   },
                   build: {
                     commands: [
-                        "docker build " +
-                        "-f Dockerfile.registrar " +
-                        "-t ${DOCKER_REPO}:${CODEBUILD_RESOLVED_SOURCE_VERSION} " +
-                        "--build-arg NPM_TOKEN=${NPM_TOKEN_READ_ONLY} ."
+                        "docker build "
+                        + "-f Dockerfile/registrar.dockerfile "
+                        + "-t ${DOCKER_REPO}:${CODEBUILD_RESOLVED_SOURCE_VERSION} "
+                        + "--build-arg NPM_TOKEN=${NPM_TOKEN_READ_ONLY} "
+                        + "."
                     ]
                   },
                   post_build: {
