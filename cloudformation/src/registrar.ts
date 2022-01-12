@@ -66,7 +66,14 @@ export class Registrar extends Construct {
                             })
                         ]
                     })
-                }
+                },
+                managedPolicies: [
+                    iam.ManagedPolicy.fromManagedPolicyArn(
+                        this, 
+                        "LambdaPolicy",
+                        "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+                    )
+                ]
             })
         })
         props.fileSystem.connections.allowDefaultPortFrom(this.registrarFn)

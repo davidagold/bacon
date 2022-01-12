@@ -92,22 +92,8 @@ export class Airflow extends Construct {
             volumes: [{
                 name: volumeInfo.volumeName,
                 efsVolumeConfiguration: volumeInfo.efsVolumeConfiguration
-            }],
-            executionRole: new Role(this, "AirflowExecutionRole", {
-                assumedBy: new ServicePrincipal("ecs.amazonaws.com"),
-                managedPolicies: [
-                    ManagedPolicy.fromAwsManagedPolicyName("AWSLambdaVPCAccessExecutionRole")
-                ]
-            })
+            }]
         });
-
-        let workerTask = airflowTask;
-        // if (config.airflow.createWorkerPool) {
-        //     workerTask = new FargateTaskDefinition(this, 'WorkerTask', {
-        //         cpu: config.airflow.cpu,
-        //         memoryLimitMiB: config.airflow.memoryLimitMiB
-        //     });
-        // }
 
         let airflowImageRepo = ecr.Repository.fromRepositoryAttributes(
             this, "AirflowImageRepository", {
@@ -127,6 +113,7 @@ export class Airflow extends Construct {
             airflowImageRepo, "latest"
         )
 
+        let workerTask = airflowTask; // TODO: simplify
         new Map()
             .set("webserver", airflowTask)
             .set("scheduler", airflowTask)
