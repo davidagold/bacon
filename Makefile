@@ -2,6 +2,12 @@ SHELL :/bin/bash
 
 .PHONY: image
 
+image-airflow:
+	DOCKER_BUILDKIT=0 docker build \
+		-f Dockerfile/airflow.dockerfile \
+		-t bacon-airflow:latest \
+		--build-arg MOUNT_POINT="/mnt/efs" \
+		airflow
 
 image-registrar:
 	DOCKER_BUILDKIT=0 docker build \

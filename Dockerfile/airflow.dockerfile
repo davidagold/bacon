@@ -22,7 +22,5 @@ USER ${AIRFLOW_USER}
 COPY requirements.txt .
 RUN python3 -m pip install --upgrade pip
 RUN python3 -m pip install -r requirements.txt
-RUN export PATH=~/.local/bin:$PATH && \
-    aws --version
 
 EXPOSE 8080-8082

@@ -25,12 +25,13 @@ export interface AirflowProps {
 }
 
 export class Airflow extends Construct {
+    image: ecs.EcrImage
 
     constructor(parent: Construct, name: string, props: AirflowProps) {
         super(parent, name);
         
         let volumeInfo = {
-            containerPath: config.airflow.efsMountPoint,
+            containerPath: config.EFS_MOUNT_POINT,
             volumeName: "SharedVolume",
             efsVolumeConfiguration: {
                 fileSystemId: props.fileSystem.fileSystemId,
@@ -68,6 +69,7 @@ export class Airflow extends Construct {
 
         const env = {
             AWS_REGION: Aws.REGION,
+            AIRFLOW__CORE__DAGS_FOLDER: config.airflow.dagsFolder,
             AIRFLOW__CORE__SQL_ALCHEMY_CONN: rds.dbConnection,
             AIRFLOW__CELERY__BROKER_URL: "sqs://",
             AIRFLOW__CELERY__RESULT_BACKEND: "db+" + rds.dbConnection,
@@ -76,7 +78,7 @@ export class Airflow extends Construct {
             ADMIN_PASS: adminPassword,
             CLUSTER: props.cluster.clusterName,
             EFS_FILE_SYSTEM_ID: props.fileSystem.fileSystemId,
-            MOUNT_POINT: config.airflow.efsMountPoint,
+            MOUNT_POINT: config.EFS_MOUNT_POINT,
             SECURITY_GROUP: props.defaultVpcSecurityGroup.securityGroupId,
             SUBNETS: props.subnets.map(subnet => subnet.subnetId).join(",")
         };
@@ -109,7 +111,7 @@ export class Airflow extends Construct {
                 )
             }
         )
-        let airflowImage = ecs.ContainerImage.fromEcrRepository(
+        this.image = ecs.ContainerImage.fromEcrRepository(
             airflowImageRepo, "latest"
         )
 
@@ -121,7 +123,7 @@ export class Airflow extends Construct {
             .forEach((task: ecs.FargateTaskDefinition, taskName: string) => {
                 let cConfig = config.airflow[taskName] as ContainerConfig
                 let container = task.addContainer(cConfig.name, {
-                    image: airflowImage,
+                    image: this.image,
                     logging: logging,
                     environment: env,
                     entryPoint: [cConfig.entryPoint],

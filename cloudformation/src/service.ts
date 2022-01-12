@@ -60,6 +60,7 @@ export class Service extends Construct {
                 subnetType: ec2.SubnetType.PUBLIC
             }),
             healthCheckGracePeriod: Duration.seconds(300),
+            desiredCount: 1
         });
 
         props.rds.rdsInstance.connections

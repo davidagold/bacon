@@ -2,7 +2,7 @@
 import fs = require("fs")
 import path = require("path")
 
-import { SWEEPS_DIR } from "../experiments/sweep"
+import { SWEEPS_DIR } from "../experiments/sweep/config"
 
 interface BaconEvent {
     eventType: "REGISTER" | "DEREGISTER"
@@ -13,12 +13,12 @@ interface BaconEvent {
 
 exports.main = async (event: BaconEvent) => {
     if (event.experimentType === "SWEEP") {
-        let configDir = path.join(SWEEPS_DIR, event.experimentId)
+        let sweepConfigDir = path.join(SWEEPS_DIR, event.experimentId)
         console.log("Writing sweep config")
         try {
-            fs.mkdirSync(configDir, { recursive: true })
+            fs.mkdirSync(sweepConfigDir, { recursive: true })
             fs.writeFileSync(
-                path.join(configDir, "sweep.yaml"),
+                path.join(sweepConfigDir, "sweep.yaml"),
                 event.config
             )
         } catch (error) {

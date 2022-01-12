@@ -56,7 +56,7 @@ export class Registrar extends Construct {
             runtime: lambda.Runtime.FROM_IMAGE,
             handler: lambda.Handler.FROM_IMAGE,
             filesystem: lambda.FileSystem.fromEfsAccessPoint(
-                accessPoint, config.airflow.efsMountPoint
+                accessPoint, config.EFS_MOUNT_POINT
             ),
             vpc: props.vpc,
             role: new iam.Role(this, "RegistrarFnServiceRole", {

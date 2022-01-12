@@ -59,7 +59,7 @@ let airflowDockerArtifact = artifacts.docker({
     PrivilegedMode: true,
     EnvironmentVariables: [
         npmTokenEnvVar,
-        { Name: "MOUNT_POINT", Value: config.airflow.efsMountPoint }
+        { Name: "MOUNT_POINT", Value: config.EFS_MOUNT_POINT }
     ],
     InstallCommands: [
         "nohup /usr/local/bin/dockerd --host=unix:///var/run/docker.sock " +
@@ -124,7 +124,7 @@ class RegistrarImage extends Construct {
             },
             MOUNT_POINT: {
                 type: codebuild.BuildEnvironmentVariableType.PLAINTEXT,
-                value: config.airflow.efsMountPoint
+                value: config.EFS_MOUNT_POINT
             },
             TAG_COMMIT_ECR_BASE: {
                 type: codebuild.BuildEnvironmentVariableType.PLAINTEXT,

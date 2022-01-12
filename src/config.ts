@@ -10,7 +10,7 @@ export interface AirflowTaskConfig {
     readonly worker: ContainerConfig;
     readonly logRetention: RetentionDays;
     readonly createWorkerPool?: boolean;
-    readonly efsMountPoint?: string; 
+    readonly dagsFolder: string; 
 }
 
 export interface AutoScalingConfig {
@@ -38,6 +38,7 @@ export interface RdsConfig {
 }
 
 export interface Config {
+    readonly EFS_MOUNT_POINT: string,
     readonly airflow: AirflowTaskConfig
     readonly workerAutoScaling: AutoScalingConfig
     readonly rds: RdsConfig
@@ -61,7 +62,9 @@ const defaultWorkerConfig: ContainerConfig = {
     entryPoint: "/bootstrap/worker.sh"
 }
 
+const EFS_MOUNT_POINT = "/mnt/efs"
 export const config: Config = {
+    EFS_MOUNT_POINT: EFS_MOUNT_POINT,
     airflow: {
         cpu: 2048,
         memoryLimitMiB: 4096,
@@ -70,7 +73,7 @@ export const config: Config = {
         worker: defaultWorkerConfig,
         logRetention: RetentionDays.ONE_MONTH,
         createWorkerPool: false,
-        efsMountPoint: "/mnt/efs"
+        dagsFolder: `${EFS_MOUNT_POINT}/dags`
     },
     workerAutoScaling: {
         minTaskCount: 1,
