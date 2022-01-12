@@ -7,6 +7,7 @@ import cdk = require('aws-cdk-lib');
 import { Aws, Fn, CfnOutput } from 'aws-cdk-lib';
 import { Airflow } from "./src/airflow";
 import { Registrar } from "./src/registrar"
+import { SweepTask } from "./src/sweep-task"
 
 
 class Bacon extends cdk.Stack {
@@ -44,13 +45,13 @@ class Bacon extends cdk.Stack {
         new Registrar(this, "Registrar", { fileSystem: sharedFs, vpc: vpc })
 
         let cluster = new ecs.Cluster(this, 'ECSCluster', { vpc: vpc });
-
         new Airflow(this, "AirflowService", {
             cluster: cluster,
             vpc: vpc,
             defaultVpcSecurityGroup: defaultVpcSecurityGroup,
             subnets: vpc.publicSubnets,
-            fileSystem: sharedFs
+            fileSystem: sharedFs,
+            sweepTask: new SweepTask(this, "SweepTask", { vpc })
         });
     }
 }

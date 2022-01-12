@@ -71,7 +71,6 @@ export class Airflow extends Construct {
 
         const env = {
             AWS_REGION: Aws.REGION,
-            AIRFLOW__CORE__DAGS_FOLDER: config.airflow.dagsFolder,
             AIRFLOW__CORE__SQL_ALCHEMY_CONN: rds.dbConnection,
             AIRFLOW__CELERY__BROKER_URL: "sqs://",
             AIRFLOW__CELERY__RESULT_BACKEND: "db+" + rds.dbConnection,
@@ -84,7 +83,8 @@ export class Airflow extends Construct {
             SECURITY_GROUP: props.defaultVpcSecurityGroup.securityGroupId,
             SUBNET_IDS: props.subnets.map(subnet => subnet.subnetId).join(","),
             SWEEP_AGENTS_CLUSTER: props.sweepTask.cluster.clusterName,
-            SWEEP_AGENTS_CAPACITY_PROVIDER: props.sweepTask.capacityProvider.capacityProviderName
+            SWEEP_AGENTS_CAPACITY_PROVIDER: props.sweepTask.capacityProvider.capacityProviderName,
+            SWEEP_TASK_DEFINITION_ARN: props.sweepTask.task.taskDefinitionArn
         };
 
         const logging = new ecs.AwsLogDriver({

@@ -39,7 +39,9 @@ run_agents = ECSOperator(
             "securityGroups": [os.environ.get("SECURITY_GROUP")],
             "subnets": os.environ.get("SUBNET_IDS").split(",")
         }
-    }
+    },
+    task_definition=os.environ.get("SWEEP_TASK_DEFINITION_ARN"),
+    overrides={}
 )
 
 init_sweep >> run_agents
