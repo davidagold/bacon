@@ -59,7 +59,7 @@ export class Service extends Construct {
             vpcSubnets: props.vpc.selectSubnets({ 
                 subnetType: ec2.SubnetType.PUBLIC
             }),
-            healthCheckGracePeriod: Duration.seconds(150),
+            healthCheckGracePeriod: Duration.seconds(300),
         });
 
         props.rds.rdsInstance.connections
