@@ -36,7 +36,7 @@ run_agents = ECSOperator(
     },
     network_configuration={
         "awsvpcConfiguration": {
-            "securityGroups": os.environ.get("SECURITY_GROUPS").split(","),
+            "securityGroups": [os.environ.get("SECURITY_GROUP")],
             "subnets": os.environ.get("SUBNET_IDS").split(",")
         }
     }

@@ -15,6 +15,7 @@ import { Rds } from "./rds"
 import { Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { Effect, ManagedPolicy, PolicyStatement, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
 
+import { SweepTask } from "./sweep-task";
 
 export interface AirflowProps {
   readonly vpc: IVpc;
@@ -22,6 +23,7 @@ export interface AirflowProps {
   readonly defaultVpcSecurityGroup: ec2.ISecurityGroup;
   readonly subnets: ec2.ISubnet[];
   readonly fileSystem: efs.FileSystem
+  readonly sweepTask: SweepTask
 }
 
 export class Airflow extends Construct {
@@ -80,7 +82,9 @@ export class Airflow extends Construct {
             EFS_FILE_SYSTEM_ID: props.fileSystem.fileSystemId,
             MOUNT_POINT: config.EFS_MOUNT_POINT,
             SECURITY_GROUP: props.defaultVpcSecurityGroup.securityGroupId,
-            SUBNETS: props.subnets.map(subnet => subnet.subnetId).join(",")
+            SUBNET_IDS: props.subnets.map(subnet => subnet.subnetId).join(","),
+            SWEEP_AGENTS_CLUSTER: props.sweepTask.cluster.clusterName,
+            SWEEP_AGENTS_CAPACITY_PROVIDER: props.sweepTask.capacityProvider.capacityProviderName
         };
 
         const logging = new ecs.AwsLogDriver({
