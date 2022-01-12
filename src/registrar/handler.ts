@@ -18,7 +18,7 @@ exports.main = async (event: BaconEvent) => {
         try {
             fs.mkdirSync(sweepConfigDir, { recursive: true })
             fs.writeFileSync(
-                path.join(sweepConfigDir, "sweep.yaml"),
+                path.join(sweepConfigDir, "config.yaml"),
                 event.config
             )
         } catch (error) {
