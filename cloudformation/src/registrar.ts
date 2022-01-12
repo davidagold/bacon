@@ -6,6 +6,7 @@ import ec2 = require("aws-cdk-lib/aws-ec2")
 import { Construct } from "constructs"
 import { config } from "../../src/config"
 import iam = require("aws-cdk-lib/aws-iam")
+import { PosixUser } from "@aws-sdk/client-efs"
 
 
 interface RegistrarProps {
@@ -21,7 +22,16 @@ export class Registrar extends Construct {
 
         let accessPoint = new efs.AccessPoint(this, "RegistrarAccessPoint", {
             fileSystem: props.fileSystem,
-            path: "/efs"
+            path: "/efs",   // TODO: Derive from config
+            posixUser: {
+                gid: "1001",
+                uid: "1001"
+            },
+            createAcl: {
+                ownerUid: '1001',
+                ownerGid: '1001',
+                permissions: '750',
+            },
         })
 
         let registrarImageRepo = ecr.Repository.fromRepositoryAttributes(
@@ -75,12 +85,7 @@ export class Registrar extends Construct {
                         this, 
                         "LambdaPolicy",
                         "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
-                    ),
-                    // iam.ManagedPolicy.fromManagedPolicyArn(
-                    //     this, 
-                    //     "EfsPolicy",
-                    //     "arn:aws:iam::aws:policy/AmazonElasticFileSystemClientReadWriteAccess"
-                    // )
+                    )
                 ]
             })
         })
