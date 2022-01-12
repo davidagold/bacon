@@ -61,9 +61,6 @@ export class Registrar extends Construct {
                                     "elasticfilesystem:ClientMount",
                                     "elasticfilesystem:ClientWrite",
                                     "elasticfilesystem:DescribeMountTargets",
-                                    "ec2:CreateNetworkInterface",
-                                    "ec2:DescribeNetworkInterfaces",
-                                    "ec2:DeleteNetworkInterface"
                                 ],
                                 resources: [props.fileSystem.fileSystemArn]
                             })

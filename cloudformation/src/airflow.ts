@@ -13,8 +13,7 @@ import { config, ContainerConfig } from "../../src/config";
 import { Service } from "./service";
 import { Rds } from "./rds"
 import { Secret } from "aws-cdk-lib/aws-secretsmanager";
-import { sub } from "@mapbox/cloudfriend/lib/intrinsic";
-import { Effect, PolicyStatement } from "aws-cdk-lib/aws-iam";
+import { Effect, ManagedPolicy, PolicyStatement, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
 
 
 export interface AirflowProps {
@@ -94,6 +93,12 @@ export class Airflow extends Construct {
                 name: volumeInfo.volumeName,
                 efsVolumeConfiguration: volumeInfo.efsVolumeConfiguration
             }],
+            executionRole: new Role(this, "AirflowExecutionRole", {
+                assumedBy: new ServicePrincipal("ecs.amazonaws.com"),
+                managedPolicies: [
+                    ManagedPolicy.fromAwsManagedPolicyName("AWSLambdaVPCAccessExecutionRole")
+                ]
+            })
         });
 
         let workerTask = airflowTask;
