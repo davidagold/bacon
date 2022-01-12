@@ -75,7 +75,12 @@ export class Registrar extends Construct {
                         this, 
                         "LambdaPolicy",
                         "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
-                    )
+                    ),
+                    // iam.ManagedPolicy.fromManagedPolicyArn(
+                    //     this, 
+                    //     "EfsPolicy",
+                    //     "arn:aws:iam::aws:policy/AmazonElasticFileSystemClientReadWriteAccess"
+                    // )
                 ]
             })
         })
