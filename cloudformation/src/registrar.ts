@@ -21,7 +21,7 @@ export class Registrar extends Construct {
 
         let accessPoint = new efs.AccessPoint(this, "RegistrarAccessPoint", {
             fileSystem: props.fileSystem,
-            path: "/"
+            path: "/efs"
         })
 
         let registrarImageRepo = ecr.Repository.fromRepositoryAttributes(
