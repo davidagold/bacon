@@ -2,6 +2,7 @@ psycopg2-binary==2.9.3
 pycurl==7.44.1
 concurrent-log-handler==0.9.19
 plyvel==1.4.0
+apache-airflow==2.2.3
 apache-airflow-providers-amazon==2.6.0
 # argcomplete
 # awscli==1.18.64

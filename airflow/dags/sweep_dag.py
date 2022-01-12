@@ -1,19 +1,27 @@
 import datetime
 import os
+from os import path
 
 from airflow import DAG
 from airflow.providers.amazon.aws.operators.ecs import ECSOperator
+from airflow.operators.bash import BashOperator
+
 
 dag = DAG(
     dag_id="sweep_experiment_dag",
     default_view="tree",
     schedule_interval=None,
-    start_date=datetime.date(2022, 1, 1),
+    start_date=datetime.datetime(2022, 1, 1),
     catchup=False
 )
 
-# init_sweep = 
-
+prefix = path.join(os.environ.get("MOUNT_POINT"), "sweeps", )
+init_sweep = BashOperator(
+    task_id="init_sweep",
+    bash_command=f"echo wandb sweep {prefix}/$sweep_conf/config.yaml",
+    env={"sweep_conf": "{{ dag_run.conf['experiment_id'] }}"},
+    dag=dag
+)
 
 run_agents = ECSOperator(
     task_id="run_agents",
@@ -33,3 +41,5 @@ run_agents = ECSOperator(
         }
     }
 )
+
+init_sweep >> run_agents
