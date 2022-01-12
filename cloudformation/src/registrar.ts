@@ -52,7 +52,7 @@ export class Registrar extends Construct {
             role: new iam.Role(this, "RegistrarFnServiceRole", {
                 assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
                 inlinePolicies: {
-                    CodebuildPolicy: new iam.PolicyDocument({
+                    EfsPolicy: new iam.PolicyDocument({
                         statements: [
                             new iam.PolicyStatement({
                                 sid: "CloudWatchLogsStatement",
@@ -62,7 +62,10 @@ export class Registrar extends Construct {
                                     "elasticfilesystem:ClientWrite",
                                     "elasticfilesystem:DescribeMountTargets",
                                 ],
-                                resources: [props.fileSystem.fileSystemArn]
+                                resources: [
+                                    props.fileSystem.fileSystemArn,
+                                    accessPoint.accessPointArn
+                                ]
                             })
                         ]
                     })
