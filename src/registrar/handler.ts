@@ -2,7 +2,7 @@
 import fs = require("fs")
 import path = require("path")
 
-import { SWEEPS_DIR } from "../experiments/sweep/config"
+import { SWEEPS_DIR } from "../experiments/sweep"
 
 interface BaconEvent {
     eventType: "REGISTER" | "DEREGISTER"
