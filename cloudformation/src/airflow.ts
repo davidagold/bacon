@@ -65,6 +65,28 @@ export class Airflow extends Construct {
         let adminPassword = adminPasswordSecret
             .secretValueFromJson("password")
             .toString()
+        
+        const webserverSecret = new Secret(
+            this, "AirflowWebserverSecret", {
+                secretName: Fn.join(
+                    "-", [Aws.STACK_NAME, "AirflowWebserverSecret"]
+                ),
+                generateSecretString: {
+                    secretStringTemplate: JSON.stringify({}),
+                    generateStringKey: "secret_key",
+                    excludeUppercase: false,
+                    requireEachIncludedType: false,
+                    includeSpace: false,
+                    excludePunctuation: true,
+                    excludeLowercase: false,
+                    excludeNumbers: false,
+                    passwordLength: 16
+                }
+            }
+        )
+        let webserverSecretKey = webserverSecret
+            .secretValueFromJson("secret_key")
+            .toString()
 
         const env = {
             AWS_REGION: Aws.REGION,
@@ -74,7 +96,7 @@ export class Airflow extends Construct {
             AIRFLOW__CELERY__BROKER_URL: "sqs://",
             AIRFLOW__CELERY__RESULT_BACKEND: "db+" + rds.dbConnection,
             AIRFLOW__CORE__EXECUTOR: "CeleryExecutor",
-            AIRFLOW__WEBSERVER__RBAC: "True",
+            AIRFLOW__WEBSERVER__SECRET_KEY: webserverSecretKey,
             ADMIN_PASS: adminPassword,
             CLUSTER: props.cluster.clusterName,
             EFS_FILE_SYSTEM_ID: props.volumeInfo.fileSystem.fileSystemId,
