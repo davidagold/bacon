@@ -19,7 +19,7 @@ prefix = path.join(os.environ.get("MOUNT_POINT"), "sweeps")
 init_sweep = BashOperator(
     task_id="init_sweep",
     dag=dag,
-    bash_command=f"echo \"wandb sweep {prefix}/${{id}}/config.yaml\""
+    bash_command=f"echo \"wandb sweep {prefix}/${{id}}/config.yaml\"",
     env={"id": "{{ dag_run.conf['experiment_id'] }}"}
 )
 
