@@ -15,3 +15,11 @@ image-registrar:
 		-t bacon-registrar:latest \
 		--build-arg MOUNT_POINT="/mnt/efs" \
 		--build-arg NPM_TOKEN=${NPM_TOKEN_READ_ONLY} . 
+
+image-sweep:
+	DOCKER_BUILDKIT=0 docker build \
+		-f exp/sweep/Dockerfile \
+		-t bacon-airflow:latest \
+		--build-arg MOUNT_POINT="/mnt/efs" \
+		--build-arg SWEEP_DIR="/mnt/efs/sweeps" \
+		exp/sweep

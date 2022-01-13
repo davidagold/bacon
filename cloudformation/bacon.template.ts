@@ -26,23 +26,23 @@ class Bacon extends cdk.Stack {
         let efsSecurityGroup = new ec2.SecurityGroup(
             this, "EfsSecurityGroup", { vpc: vpc }
         )
-        let sharedFs = new efs.FileSystem(this, "AirflowEfsVolume", {
+        let fileSystem = new efs.FileSystem(this, "AirflowEfsVolume", {
             vpc: vpc,
             securityGroup: efsSecurityGroup
         })
         vpc.privateSubnets.forEach((subnet) => {
             new efs.CfnMountTarget(this, "EfsMountTarget", {
-                fileSystemId: sharedFs.fileSystemId,
+                fileSystemId: fileSystem.fileSystemId,
                 securityGroups: [efsSecurityGroup.securityGroupId],
                 subnetId: subnet.subnetId
             })
         })
         new CfnOutput(this, "EfsFileSystemId", {
-            value: sharedFs.fileSystemId,
+            value: fileSystem.fileSystemId,
             exportName: Fn.join("-", [Aws.STACK_NAME, "EfsFileSystemId"])
         })
         
-        new Registrar(this, "Registrar", { fileSystem: sharedFs, vpc: vpc })
+        new Registrar(this, "Registrar", { fileSystem: fileSystem, vpc: vpc })
 
         let cluster = new ecs.Cluster(this, 'ECSCluster', { vpc: vpc });
         new Airflow(this, "AirflowService", {
@@ -50,8 +50,8 @@ class Bacon extends cdk.Stack {
             vpc: vpc,
             defaultVpcSecurityGroup: defaultVpcSecurityGroup,
             subnets: vpc.publicSubnets,
-            fileSystem: sharedFs,
-            sweepTask: new SweepTask(this, "SweepTask", { vpc })
+            fileSystem: fileSystem,
+            sweepTask: new SweepTask(this, "SweepTask", { vpc, fileSystem })
         });
     }
 }

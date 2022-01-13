@@ -7,6 +7,8 @@ import { Role, ServicePrincipal, PolicyDocument, PolicyStatement, Effect, IRole 
 import { IRepository, Repository } from "aws-cdk-lib/aws-ecr";
 import { statements } from "./src/statements"
 
+import { SweepTaskImage } from "./src/sweep-task";
+
 const cf = require('@mapbox/cloudfriend')
 const artifacts = require("@davidagold/artifacts")
 
@@ -194,14 +196,6 @@ class Images extends Stack {
     constructor(scope, id, props?) {
         super(scope, id)
 
-        let dockerRepo = new Repository(this, "RegistrarDockerRepository", {
-            repositoryName: Fn.join("-", [Aws.STACK_NAME, "registrar"])
-        })
-        new CfnOutput(this, "RegistrarDkrRepositoryArn", {
-            value: dockerRepo.repositoryArn,
-            exportName: Fn.join("-", [Aws.STACK_NAME, "RegistrarDkrRepositoryArn"])
-        })
-
         let serviceRole = new Role(this, "RegistrarProjectServiceRole", {
             assumedBy: new ServicePrincipal("codebuild.amazonaws.com"),
             inlinePolicies: {
@@ -209,7 +203,27 @@ class Images extends Stack {
             }
         })
 
-        new RegistrarImage(this, "RegistrarImage", { serviceRole, dockerRepo })
+        let registrarDockerRepo = new Repository(this, "RegistrarDockerRepository", {
+            repositoryName: Fn.join("-", [Aws.STACK_NAME, "registrar"])
+        })
+        new CfnOutput(this, "RegistrarDkrRepositoryArn", {
+            value: registrarDockerRepo.repositoryArn,
+            exportName: Fn.join("-", [Aws.STACK_NAME, "RegistrarDkrRepositoryArn"])
+        })
+        new RegistrarImage(this, "RegistrarImage", { 
+            serviceRole, dockerRepo: registrarDockerRepo 
+        })
+
+        let sweepTaskDockerRepo = new Repository(this, "SweepTaskDockerRepository", {
+            repositoryName: Fn.join("-", [Aws.STACK_NAME, "sweep"])
+        })
+        new CfnOutput(this, "SweepTaskDkrRepositoryArn", {
+            value: registrarDockerRepo.repositoryArn,
+            exportName: Fn.join("-", [Aws.STACK_NAME, "SweepTaskDkrRepositoryArn"])
+        })
+        new SweepTaskImage(this, "SweepTaskImage", {
+            serviceRole, dockerRepo: sweepTaskDockerRepo
+        })
     }
 }
 
