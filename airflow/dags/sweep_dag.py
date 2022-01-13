@@ -1,6 +1,6 @@
 import datetime
 import os
-from os import environ, path
+from os import path
 
 from airflow import DAG
 from airflow.providers.amazon.aws.operators.ecs import ECSOperator
@@ -44,7 +44,10 @@ run_agents = ECSOperator(
     overrides={},
     awslogs_group=os.environ.get("AWS_LOG_GROUP"),
     awslogs_region=os.environ.get("AWS_REGION"),
-    awslogs_stream_prefix=os.environ.get("AWS_LOG_STREAM_PREFIX_SWEEP")
+    awslogs_stream_prefix=path.join(
+        os.environ.get("AWS_LOG_STREAM_PREFIX_SWEEP"),
+        "SweepContainer"
+    )
 )
 
 init_sweep >> run_agents
