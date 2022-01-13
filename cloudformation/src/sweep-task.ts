@@ -19,6 +19,7 @@ interface SweepTaskProps {
     vpc: ec2.Vpc
     volumeInfo: EfsVolumeInfo
     logGroup: logs.LogGroup
+    defaultSecurityGroup: ec2.SecurityGroup
 }
 
 export class SweepTask extends Construct {
@@ -31,6 +32,7 @@ export class SweepTask extends Construct {
 
         let autoScalingGroup = new autoscaling.AutoScalingGroup(this, 'ASG', {
             vpc: props.vpc,
+            securityGroup: props.defaultSecurityGroup,
             // instanceType: new ec2.InstanceType('p2.8xlarge'),
             instanceType: new ec2.InstanceType('c5.9xlarge'),
             machineImage: ecs.EcsOptimizedImage.amazonLinux2(),

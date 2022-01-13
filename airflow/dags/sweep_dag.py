@@ -29,11 +29,11 @@ run_agents = ECSOperator(
     aws_conn_id="aws_default",
     cluster=os.environ.get("SWEEP_AGENTS_CLUSTER"),
     launch_type="EC2",
-    capacity_provider_strategy={
+    capacity_provider_strategy=[{
         "capacityProvider": os.environ.get("SWEEP_AGENTS_CAPACITY_PROVIDER"),
         "weight": 1,
         "base": 1
-    },
+    }],
     network_configuration={
         "awsvpcConfiguration": {
             "securityGroups": [os.environ.get("SECURITY_GROUP")],

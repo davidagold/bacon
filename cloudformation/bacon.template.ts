@@ -71,7 +71,7 @@ class Bacon extends cdk.Stack {
             volumeInfo: volumeInfo,
             logGroup: logGroup,
             sweepTask: new SweepTask(this, "SweepTask", { 
-                vpc, volumeInfo, logGroup
+                vpc, volumeInfo, logGroup, defaultSecurityGroup: defaultVpcSecurityGroup
             })
         });
     }
