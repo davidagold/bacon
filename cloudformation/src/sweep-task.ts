@@ -51,7 +51,6 @@ export class SweepTask extends Construct {
             networkMode: NetworkMode.AWS_VPC,
         })
         let policies = new Policies(this, "SweepTaskPolicies")
-        policies.addToRole(this.task.executionRole)
         policies.addToRole(this.task.taskRole)
         this.task.addVolume({   // TODO: Factor into Task Construct
             name: props.volumeInfo.volumeName, 
