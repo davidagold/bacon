@@ -1,19 +1,17 @@
-import { CfnOutput } from "aws-cdk-lib";
+import { SecretValue } from "aws-cdk-lib";
 import { Construct } from 'constructs';
-import { IVpc, SecurityGroup } from "aws-cdk-lib/aws-ec2";
+import { IVpc } from "aws-cdk-lib/aws-ec2";
 
 import { Fn, Aws } from "aws-cdk-lib";
 import ecs = require('aws-cdk-lib/aws-ecs');
 import ec2 = require("aws-cdk-lib/aws-ec2");
 import ecr = require("aws-cdk-lib/aws-ecr");
-import efs = require("aws-cdk-lib/aws-efs");
 import { FargateTaskDefinition } from 'aws-cdk-lib/aws-ecs';
 
 import { config, ContainerConfig } from "../../src/config";
 import { Service } from "./service";
 import { Rds } from "./rds"
-import { Secret } from "aws-cdk-lib/aws-secretsmanager";
-import { Effect, ManagedPolicy, PolicyStatement, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
+import { Effect, PolicyStatement } from "aws-cdk-lib/aws-iam";
 import { LogGroup } from "aws-cdk-lib/aws-logs";
 
 import { SweepTask } from "./sweep-task";
@@ -70,7 +68,10 @@ export class Airflow extends Construct {
             SUBNET_IDS: props.subnets.map(subnet => subnet.subnetId).join(","),
             SWEEP_AGENTS_CLUSTER: props.sweepTask.cluster.clusterName,
             SWEEP_AGENTS_CAPACITY_PROVIDER: props.sweepTask.capacityProvider.capacityProviderName,
-            SWEEP_TASK_DEFINITION_ARN: props.sweepTask.task.taskDefinitionArn
+            SWEEP_TASK_DEFINITION_ARN: props.sweepTask.task.taskDefinitionArn,
+            WANDB_API_KEY: SecretValue.secretsManager(
+                "WandbApiTokenSecret", { jsonField: "WandbApiKey" }
+            ).toString()
         };
 
         const airflowTask = new FargateTaskDefinition(this, 'AirflowTask', {
