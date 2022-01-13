@@ -44,14 +44,17 @@ export class SweepTask extends Construct {
         this.task = new ecs.Ec2TaskDefinition(this, "SweepTask")
         this.task.addContainer("SweepContainer", {
             image: EcrImage.fromEcrRepository(
-                ecr.Repository.fromRepositoryArn(
+                ecr.Repository.fromRepositoryAttributes(
                     this, 
                     "SweepTaskDockerRepo", 
-                    Fn.join("-", [
-                        Aws.STACK_NAME,
-                        "images",
-                        "SweepTaskDkrRepositoryArn"
-                    ]).toString()
+                    {
+                        repositoryName: Fn.join("-", [Aws.STACK_NAME, "images", "sweep"]),
+                        repositoryArn:  Fn.importValue(Fn.join("-", [
+                            Aws.STACK_NAME,
+                            "images",
+                            "SweepTaskDkrRepositoryArn"
+                        ]))
+                    }
                 ), 
                 "latest"
             ),
