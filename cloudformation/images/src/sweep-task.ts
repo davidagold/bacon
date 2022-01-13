@@ -90,7 +90,7 @@ export class SweepTaskImage extends Construct {
                   build: {
                     commands: [
                         "docker build "
-                        + "-f Dockerfile/registrar.dockerfile "
+                        + "-f exp/sweep/Dockerfile "
                         + "-t ${DOCKER_REPO}:${CODEBUILD_RESOLVED_SOURCE_VERSION} "
                         + "--build-arg NPM_TOKEN=${NPM_TOKEN_READ_ONLY} "
                         + "."
@@ -107,7 +107,7 @@ export class SweepTaskImage extends Construct {
             }
         })
 
-        new aws_codebuild.Project(this, "RegistrarProject", {
+        new aws_codebuild.Project(this, "SweepExperimentProject", {
             source: gitHubSource,
             environment: {
                 buildImage: aws_codebuild.LinuxBuildImage.STANDARD_4_0,
