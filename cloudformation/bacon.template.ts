@@ -58,7 +58,7 @@ class Bacon extends cdk.Stack {
         new Registrar(this, "Registrar", { fileSystem: fileSystem, vpc: vpc })
 
         let logGroup = new logs.LogGroup(this, "BaconLogs", {
-            logGroupName: "bacon/logs",
+            logGroupName: Fn.join("/", [Aws.STACK_NAME, "logs"]),
             retention: logs.RetentionDays.ONE_MONTH
         })
 

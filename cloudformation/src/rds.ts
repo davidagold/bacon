@@ -1,4 +1,4 @@
-import { Duration} from "aws-cdk-lib";
+import { Duration, Fn, Aws } from "aws-cdk-lib";
 import { Construct } from 'constructs';
 import {
     DatabaseInstance,
@@ -29,7 +29,9 @@ export class Rds extends Construct {
         super(parent, name);
 
         const backendSecret: ISecret = new Secret(this, "DatabseSecret", {
-            secretName: name + "Secret",
+            secretName: Fn.join(
+                "-", [Aws.STACK_NAME, "RdsPasswordSecret"]
+            ),
             description: "airflow RDS secrets",
             generateSecretString: {
                 secretStringTemplate: JSON.stringify({
@@ -54,7 +56,7 @@ export class Rds extends Construct {
             version: PostgresEngineVersion.VER_13_4
         }),
         instanceType: config.rds.instanceType,
-        instanceIdentifier: config.rds.dbName,
+        instanceIdentifier: Fn.join("-", [Aws.STACK_NAME, config.rds.dbName]),
         vpc: props.vpc,
         securityGroups: [props.defaultVpcSecurityGroup],
         vpcSubnets: { subnetType: SubnetType.PRIVATE_ISOLATED },
