@@ -11,10 +11,13 @@ import { EcrImage } from "aws-cdk-lib/aws-ecs";
 import { SWEEP_DIR } from "../../src/experiments/sweep"
 import { Aws, Fn } from "aws-cdk-lib";
 
+import { LOG_STREAM_PREFIX_SWEEP } from "../../exp/sweep/config.json"
+
 
 interface SweepTaskProps {
     vpc: ec2.Vpc
     fileSystem: efs.FileSystem
+    logGroup: logs.LogGroup
 }
 
 export class SweepTask extends Construct {
@@ -62,15 +65,11 @@ export class SweepTask extends Construct {
             // memoryReservationMiB: 1024 * 32,
             memoryReservationMiB: 1024 * 8,
             logging: new ecs.AwsLogDriver({ 
-                streamPrefix: 'SweepTaskLogging',
-                logGroup: new logs.LogGroup(scope, "SweepTaskLogs", {
-                    logGroupName: "FarFlowDagTaskLogs",
-                    retention: logs.RetentionDays.ONE_MONTH
-                })
+                streamPrefix: LOG_STREAM_PREFIX_SWEEP, logGroup: props.logGroup
             }),
             // gpuCount: 1
             environment: {
-                EFS_FILE_SYSTEM_ID: props.fileSystem.fileSystemId
+                EFS_FILE_SYSTEM_ID: props.fileSystem.fileSystemId,
             }
         })
     }

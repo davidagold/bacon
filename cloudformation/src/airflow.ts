@@ -14,8 +14,11 @@ import { Service } from "./service";
 import { Rds } from "./rds"
 import { Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { Effect, ManagedPolicy, PolicyStatement, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
+import { LogGroup } from "aws-cdk-lib/aws-logs";
 
 import { SweepTask } from "./sweep-task";
+import { LOG_STREAM_PREFIX_SWEEP } from "../../exp/sweep/config.json"
+
 
 export interface AirflowProps {
   readonly vpc: IVpc;
@@ -24,6 +27,7 @@ export interface AirflowProps {
   readonly subnets: ec2.ISubnet[];
   readonly fileSystem: efs.FileSystem
   readonly sweepTask: SweepTask
+  readonly logGroup: LogGroup
 }
 
 export class Airflow extends Construct {
@@ -71,6 +75,8 @@ export class Airflow extends Construct {
 
         const env = {
             AWS_REGION: Aws.REGION,
+            AWS_LOG_GROUP: props.logGroup.logGroupName,
+            AWS_LOG_STREAM_PREFIX_SWEEP: LOG_STREAM_PREFIX_SWEEP,
             AIRFLOW__CORE__SQL_ALCHEMY_CONN: rds.dbConnection,
             AIRFLOW__CELERY__BROKER_URL: "sqs://",
             AIRFLOW__CELERY__RESULT_BACKEND: "db+" + rds.dbConnection,
@@ -79,6 +85,7 @@ export class Airflow extends Construct {
             ADMIN_PASS: adminPassword,
             CLUSTER: props.cluster.clusterName,
             EFS_FILE_SYSTEM_ID: props.fileSystem.fileSystemId,
+            LOG_STREAM_PREFIX_SWEEP: LOG_STREAM_PREFIX_SWEEP,
             MOUNT_POINT: config.EFS_MOUNT_POINT,
             SECURITY_GROUP: props.defaultVpcSecurityGroup.securityGroupId,
             SUBNET_IDS: props.subnets.map(subnet => subnet.subnetId).join(","),
@@ -86,11 +93,6 @@ export class Airflow extends Construct {
             SWEEP_AGENTS_CAPACITY_PROVIDER: props.sweepTask.capacityProvider.capacityProviderName,
             SWEEP_TASK_DEFINITION_ARN: props.sweepTask.task.taskDefinitionArn
         };
-
-        const logging = new ecs.AwsLogDriver({
-            streamPrefix: 'BaconLogging',
-            logRetention: config.airflow.logRetention
-        });
 
         const airflowTask = new FargateTaskDefinition(this, 'AirflowTask', {
             cpu: config.airflow.cpu,
@@ -128,7 +130,11 @@ export class Airflow extends Construct {
                 let cConfig = config.airflow[taskName] as ContainerConfig
                 let container = task.addContainer(cConfig.name, {
                     image: this.image,
-                    logging: logging,
+                    logging: new ecs.AwsLogDriver({
+                        streamPrefix: 'airflow',
+                        logRetention: config.airflow.logRetention,
+                        logGroup: props.logGroup
+                    }),
                     environment: env,
                     entryPoint: [cConfig.entryPoint],
                     cpu: cConfig.cpu,

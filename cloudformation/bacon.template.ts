@@ -4,10 +4,12 @@ import ec2 = require('aws-cdk-lib/aws-ec2');
 import ecs = require('aws-cdk-lib/aws-ecs');
 import efs = require("aws-cdk-lib/aws-efs")
 import cdk = require('aws-cdk-lib');
+import logs = require("aws-cdk-lib/aws-logs")
 import { Aws, Fn, CfnOutput } from 'aws-cdk-lib';
 import { Airflow } from "./src/airflow";
 import { Registrar } from "./src/registrar"
 import { SweepTask } from "./src/sweep-task"
+import { config } from "../src/config"
 
 
 class Bacon extends cdk.Stack {
@@ -44,6 +46,11 @@ class Bacon extends cdk.Stack {
         
         new Registrar(this, "Registrar", { fileSystem: fileSystem, vpc: vpc })
 
+        let logGroup = new logs.LogGroup(scope, "SweepTaskLogs", {
+            logGroupName: "SweepTaskLogs",
+            retention: logs.RetentionDays.ONE_MONTH
+        })
+
         let cluster = new ecs.Cluster(this, 'ECSCluster', { vpc: vpc });
         new Airflow(this, "AirflowService", {
             cluster: cluster,
@@ -51,7 +58,10 @@ class Bacon extends cdk.Stack {
             defaultVpcSecurityGroup: defaultVpcSecurityGroup,
             subnets: vpc.publicSubnets,
             fileSystem: fileSystem,
-            sweepTask: new SweepTask(this, "SweepTask", { vpc, fileSystem })
+            logGroup: logGroup,
+            sweepTask: new SweepTask(this, "SweepTask", { 
+                vpc, fileSystem, logGroup
+            })
         });
     }
 }
