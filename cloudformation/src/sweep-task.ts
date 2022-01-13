@@ -50,13 +50,15 @@ export class SweepTask extends Construct {
         this.task = new ecs.Ec2TaskDefinition(this, "SweepTask", {
             networkMode: NetworkMode.AWS_VPC
         })
+        new Policies(this, "SweepTaskPolicies").addToRole(this.task.executionRole)
         this.task.addVolume({   // TODO: Factor into Task Construct
             name: props.volumeInfo.volumeName, 
             efsVolumeConfiguration: { 
                 fileSystemId: props.volumeInfo.fileSystem.fileSystemId
-            } 
+            }
         })
-        let container = this.task.addContainer("SweepContainer", {
+
+        this.task.addContainer("SweepContainer", {
             image: EcrImage.fromEcrRepository(
                 ecr.Repository.fromRepositoryAttributes(
                     this, 
@@ -83,12 +85,10 @@ export class SweepTask extends Construct {
                 EFS_FILE_SYSTEM_ID: props.volumeInfo.fileSystem.fileSystemId,
             }
         })
-        container.addMountPoints({  // TODO: Factor into task construct
-            containerPath: props.volumeInfo.containerPath,
-            sourceVolume: props.volumeInfo.volumeName,
-            readOnly: false
-        })
-
-        new Policies(this, "SweepTaskPolicies").addToRole(this.task.taskRole)
+            .addMountPoints({  // TODO: Factor into task construct
+                containerPath: props.volumeInfo.containerPath,
+                sourceVolume: props.volumeInfo.volumeName,
+                readOnly: false
+            })
     }
 }
