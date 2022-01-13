@@ -93,6 +93,7 @@ export class SweepTaskImage extends Construct {
                         + "-f exp/sweep/Dockerfile "
                         + "-t ${DOCKER_REPO}:${CODEBUILD_RESOLVED_SOURCE_VERSION} "
                         + "--build-arg NPM_TOKEN=${NPM_TOKEN_READ_ONLY} "
+                        + "--build-arg MOUNT_POINT=${MOUNT_POINT}"
                         + "."
                     ]
                   },
