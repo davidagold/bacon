@@ -100,8 +100,13 @@ export class SweepTask extends Construct {
         })
         container.addToExecutionPolicy(new iam.PolicyStatement({
             effect: iam.Effect.ALLOW,
-            actions: ["elasticfilesystem:ClientMount"],
-            resources: [props.volumeInfo.fileSystem.fileSystemArn]
+            actions: [
+                "elasticfilesystem:ClientMount",
+                "elasticfilesystem:ClientWrite"
+            ],
+            resources: [
+                props.volumeInfo.fileSystem.fileSystemArn
+            ]
         }))
     }
 }
