@@ -1,7 +1,6 @@
 FROM python:3.8-slim
 
 WORKDIR /usr/app
-ARG AWS_ROOT="/usr/bin/aws"
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
     apt install -y git curl build-essential binutils
@@ -22,6 +21,8 @@ RUN pip3 install wandb
 ARG MOUNT_POINT
 ENV MOUNT_POINT=${MOUNT_POINT}
 RUN mkdir -p ${MOUNT_POINT}
+
+RUN apt-get install -y crudini
 
 COPY init.sh .
 ENTRYPOINT [ "/bin/bash", "init.sh" ]

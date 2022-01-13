@@ -86,6 +86,7 @@ export class SweepTask extends Construct {
             }),
             // gpuCount: 1
             environment: {
+                AWS_REGION: Aws.REGION,
                 EFS_FILE_SYSTEM_ID: props.volumeInfo.fileSystem.fileSystemId,
                 WANDB_API_KEY: SecretValue.secretsManager(
                     "WandbApiTokenSecret", { jsonField: "WandbApiKey" }
