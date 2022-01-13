@@ -9,6 +9,7 @@ import { Airflow } from "./airflow"
 import logs = require("aws-cdk-lib/aws-logs");
 import { EcrImage } from "aws-cdk-lib/aws-ecs";
 import { SWEEP_DIR } from "../../src/experiments/sweep"
+import { Aws, Fn } from "aws-cdk-lib";
 
 
 interface SweepTaskProps {
@@ -45,8 +46,12 @@ export class SweepTask extends Construct {
             image: EcrImage.fromEcrRepository(
                 ecr.Repository.fromRepositoryArn(
                     this, 
-                    "DevcontainerRepo", 
-                    "arn:aws:ecr:us-east-2:510666016636:repository/devcontainer-staging"	
+                    "SweepTaskDockerRepo", 
+                    Fn.join("-", [
+                        Aws.STACK_NAME,
+                        "images",
+                        "SweepTaskDkrRepositoryArn"
+                    ]).toString()
                 ), 
                 "latest"
             ),
