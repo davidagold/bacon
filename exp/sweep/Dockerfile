@@ -8,7 +8,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
 RUN git clone https://github.com/aws/efs-utils /usr/tmp/efs-utils && \
     (cd /usr/tmp/efs-utils && ./build-deb.sh && \ 
     apt-get -y install ./build/amazon-efs-utils*deb)
-RUN test -f /sbin/mount.efs && echo "${EFS_FILE_SYSTEM_ID}:/ ${MOUNT_POINT}/ efs defaults,user" >> /etc/fstab
+
 
 RUN DEBIAN_FRONTEND=noninteractive pip3 install --upgrade pip && \
     pip3 install --no-cache-dir \

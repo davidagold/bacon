@@ -102,7 +102,8 @@ export class SweepTask extends Construct {
             effect: iam.Effect.ALLOW,
             actions: [
                 "elasticfilesystem:ClientMount",
-                "elasticfilesystem:ClientWrite"
+                "elasticfilesystem:ClientWrite",
+                "elasticfilesystem:DescribeMountTargets"
             ],
             resources: [
                 props.volumeInfo.fileSystem.fileSystemArn

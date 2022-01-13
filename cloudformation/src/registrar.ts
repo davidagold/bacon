@@ -6,7 +6,6 @@ import ec2 = require("aws-cdk-lib/aws-ec2")
 import { Construct } from "constructs"
 import { config } from "../../src/config"
 import iam = require("aws-cdk-lib/aws-iam")
-import { PosixUser } from "@aws-sdk/client-efs"
 
 
 interface RegistrarProps {
