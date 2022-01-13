@@ -26,3 +26,4 @@ RUN python3 -m pip install -r requirements.txt
 COPY dags/ ${AIRFLOW_HOME}/dags/
 
 EXPOSE 8080
+EXPOSE 8793

@@ -131,8 +131,7 @@ export class Airflow extends Construct {
                 let container = task.addContainer(cConfig.name, {
                     image: this.image,
                     logging: new ecs.AwsLogDriver({
-                        streamPrefix: 'airflow',
-                        logRetention: config.airflow.logRetention,
+                        streamPrefix: `airflow-${taskName}`,
                         logGroup: props.logGroup
                     }),
                     environment: env,
@@ -145,9 +144,10 @@ export class Airflow extends Construct {
                     sourceVolume: volumeInfo.volumeName,
                     readOnly: false
                 })
-                container.addPortMappings({
-                    containerPort: cConfig.containerPort
-                });
+                container.addPortMappings(
+                    { containerPort: cConfig.containerPort },
+                    { containerPort: 8793 }
+                );
                 container.addToExecutionPolicy(new PolicyStatement({
                     effect: Effect.ALLOW,
                     actions: ["elasticfilesystem:ClientMount"],
