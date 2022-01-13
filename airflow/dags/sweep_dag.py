@@ -42,7 +42,7 @@ run_agents = ECSOperator(
     task_definition=os.environ.get("SWEEP_TASK_DEFINITION_ARN"),
     overrides={},
     awslogs_group=os.environ.get("AWS_LOG_GROUP"),
-    awslogs_region=os.environ.get("AWS_REGION"),
+    awslogs_region=os.environ.get("AWS_DEFAULT_REGION"),
     awslogs_stream_prefix=path.join(
         os.environ.get("AWS_LOG_STREAM_PREFIX_SWEEP"),
         "SweepContainer"    # TODO: Derive from config

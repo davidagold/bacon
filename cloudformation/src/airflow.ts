@@ -89,7 +89,7 @@ export class Airflow extends Construct {
             .toString()
 
         const env = {
-            AWS_REGION: Aws.REGION,
+            AWS_DEFAULT_REGION: Aws.REGION,
             AWS_LOG_GROUP: props.logGroup.logGroupName,
             AWS_LOG_STREAM_PREFIX_SWEEP: LOG_STREAM_PREFIX_SWEEP,
             AIRFLOW__CORE__SQL_ALCHEMY_CONN: rds.dbConnection,
