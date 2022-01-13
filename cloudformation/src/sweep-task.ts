@@ -7,7 +7,7 @@ import autoscaling = require("aws-cdk-lib/aws-autoscaling")
 
 import { Airflow } from "./airflow"
 import logs = require("aws-cdk-lib/aws-logs");
-import { EcrImage } from "aws-cdk-lib/aws-ecs";
+import { EcrImage, NetworkMode } from "aws-cdk-lib/aws-ecs";
 import { SWEEP_DIR } from "../../src/experiments/sweep"
 import { Aws, Fn } from "aws-cdk-lib";
 
@@ -47,7 +47,9 @@ export class SweepTask extends Construct {
         this.cluster = new ecs.Cluster(this, "SweepCluster", { vpc: props.vpc })
         this.cluster.addAsgCapacityProvider(this.capacityProvider)
 
-        this.task = new ecs.Ec2TaskDefinition(this, "SweepTask")
+        this.task = new ecs.Ec2TaskDefinition(this, "SweepTask", {
+            networkMode: NetworkMode.AWS_VPC
+        })
         this.task.addVolume({   // TODO: Factor into Task Construct
             name: props.volumeInfo.volumeName, 
             efsVolumeConfiguration: { 
