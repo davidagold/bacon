@@ -218,7 +218,7 @@ class Images extends Stack {
             repositoryName: Fn.join("-", [Aws.STACK_NAME, "sweep"])
         })
         new CfnOutput(this, "SweepTaskDkrRepositoryArn", {
-            value: registrarDockerRepo.repositoryArn,
+            value: sweepTaskDockerRepo.repositoryArn,
             exportName: Fn.join("-", [Aws.STACK_NAME, "SweepTaskDkrRepositoryArn"])
         })
         new SweepTaskImage(this, "SweepTaskImage", {
