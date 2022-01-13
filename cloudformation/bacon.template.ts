@@ -24,8 +24,22 @@ class Bacon extends cdk.Stack {
         super(scope, id, props);
         cdk.Tags.of(scope).add("Stack", cdk.Aws.STACK_NAME);
 
-        let vpc = new ec2.Vpc(this, 'Vpc', { 
-            maxAzs: 2, natGateways: 0
+        let vpc = new ec2.Vpc(this, 'Vpc', {
+            maxAzs: 2,
+            natGateways: 0,
+            subnetConfiguration: [
+                {
+                    name: "public",
+                    cidrMask: 24,
+                    subnetType: ec2.SubnetType.PUBLIC,
+                    mapPublicIpOnLaunch: true
+                },
+                {
+                    name: "private",
+                    cidrMask: 24,
+                    subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
+                }
+            ]
         });
         let defaultVpcSecurityGroup = new ec2.SecurityGroup(
             this, "SecurityGroup", { vpc: vpc }
@@ -58,7 +72,7 @@ class Bacon extends cdk.Stack {
         new Registrar(this, "Registrar", { fileSystem: fileSystem, vpc: vpc })
 
         let logGroup = new logs.LogGroup(this, "BaconLogs", {
-            logGroupName: Fn.join("/", [Aws.STACK_NAME, "logs"]),
+            logGroupName: Fn.join("/", ["", Aws.STACK_NAME, "logs"]),
             retention: logs.RetentionDays.ONE_MONTH
         })
 

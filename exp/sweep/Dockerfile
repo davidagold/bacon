@@ -26,4 +26,4 @@ ARG SWEEP_DIR
 ENV SWEEP_DIR=${SWEEP_DIR}
 
 COPY init.sh .
-ENTRYPOINT [ "init.sh" ]
+ENTRYPOINT [ "/bin/bash", "init.sh" ]

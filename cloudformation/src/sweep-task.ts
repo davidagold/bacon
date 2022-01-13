@@ -3,6 +3,7 @@ import ecs = require("aws-cdk-lib/aws-ecs")
 import ecr = require("aws-cdk-lib/aws-ecr")
 import ec2 = require("aws-cdk-lib/aws-ec2")
 import efs = require("aws-cdk-lib/aws-efs")
+import iam = require("aws-cdk-lib/aws-iam")
 import autoscaling = require("aws-cdk-lib/aws-autoscaling")
 
 import { Airflow } from "./airflow"
@@ -38,6 +39,8 @@ export class SweepTask extends Construct {
             machineImage: ecs.EcsOptimizedImage.amazonLinux2(),
             minCapacity: 0,
             maxCapacity: 1,
+            associatePublicIpAddress: true,
+            vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC }
         });
         this.capacityProvider = new ecs.AsgCapacityProvider(
             this,
@@ -53,13 +56,13 @@ export class SweepTask extends Construct {
         let policies = new Policies(this, "SweepTaskPolicies")
         policies.addToRole(this.task.taskRole)
         this.task.addVolume({   // TODO: Factor into Task Construct
-            name: props.volumeInfo.volumeName, 
+            name: props.volumeInfo.volumeName,
             efsVolumeConfiguration: { 
                 fileSystemId: props.volumeInfo.fileSystem.fileSystemId
             }
         })
 
-        this.task.addContainer("SweepContainer", {
+        let container = this.task.addContainer("SweepContainer", {
             image: EcrImage.fromEcrRepository(
                 ecr.Repository.fromRepositoryAttributes(
                     this, 
@@ -86,10 +89,15 @@ export class SweepTask extends Construct {
                 EFS_FILE_SYSTEM_ID: props.volumeInfo.fileSystem.fileSystemId,
             }
         })
-            .addMountPoints({  // TODO: Factor into task construct
-                containerPath: props.volumeInfo.containerPath,
-                sourceVolume: props.volumeInfo.volumeName,
-                readOnly: false
-            })
+        container.addMountPoints({  // TODO: Factor into task construct
+            containerPath: props.volumeInfo.containerPath,
+            sourceVolume: props.volumeInfo.volumeName,
+            readOnly: false
+        })
+        container.addToExecutionPolicy(new iam.PolicyStatement({
+            effect: iam.Effect.ALLOW,
+            actions: ["elasticfilesystem:ClientMount"],
+            resources: [props.volumeInfo.fileSystem.fileSystemArn]
+        }))
     }
 }
