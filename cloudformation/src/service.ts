@@ -38,16 +38,8 @@ export class Service extends Construct {
         super(parent, id);
 
         let policies = new Policies(this, "AIrflowTaskPolicies");
-        if (policies.managedPolicies) {
-            policies.managedPolicies.forEach((managedPolicy) => 
-                props.taskDefinition.taskRole.addManagedPolicy(managedPolicy)
-            );
-        }
-        if (policies.policyStatements) {
-            policies.policyStatements.forEach((policyStatement) => 
-                props.taskDefinition.taskRole.addToPrincipalPolicy(policyStatement)
-            );
-        }
+        policies.addToRole(props.taskDefinition.executionRole)
+        policies.addToRole(props.taskDefinition.taskRole)
 
         this.fargateService = new ecs.FargateService(this, id, {
             cluster: props.cluster,

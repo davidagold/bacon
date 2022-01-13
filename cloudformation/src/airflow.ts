@@ -183,16 +183,5 @@ export class Airflow extends Construct {
         props.volumeInfo.fileSystem.connections.allowDefaultPortFrom(
             service.fargateService
         )
-
-        if (config.airflow.createWorkerPool) {
-            new Service(this, "WorkerService", {
-                cluster: props.cluster,
-                defaultVpcSecurityGroup: props.defaultVpcSecurityGroup,
-                vpc: props.vpc,
-                taskDefinition: workerTask,
-                attachLoadBalancer: false,
-                rds: rds
-            });
-        }
     }
 }

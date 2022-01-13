@@ -48,9 +48,11 @@ export class SweepTask extends Construct {
         this.cluster.addAsgCapacityProvider(this.capacityProvider)
 
         this.task = new ecs.Ec2TaskDefinition(this, "SweepTask", {
-            networkMode: NetworkMode.AWS_VPC
+            networkMode: NetworkMode.AWS_VPC,
         })
-        new Policies(this, "SweepTaskPolicies").addToRole(this.task.executionRole)
+        let policies = new Policies(this, "SweepTaskPolicies")
+        policies.addToRole(this.task.executionRole)
+        policies.addToRole(this.task.taskRole)
         this.task.addVolume({   // TODO: Factor into Task Construct
             name: props.volumeInfo.volumeName, 
             efsVolumeConfiguration: { 
