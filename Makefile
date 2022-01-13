@@ -4,14 +4,14 @@ SHELL :/bin/bash
 
 image-airflow:
 	DOCKER_BUILDKIT=0 docker build \
-		-f Dockerfile/airflow.dockerfile \
+		-f airflow/Dockerfile \
 		-t bacon-airflow:latest \
 		--build-arg MOUNT_POINT="/mnt/efs" \
 		airflow
 
 image-registrar:
 	DOCKER_BUILDKIT=0 docker build \
-		-f Dockerfile.registrar \
+		-f Dockerfile \
 		-t bacon-registrar:latest \
 		--build-arg MOUNT_POINT="/mnt/efs" \
 		--build-arg NPM_TOKEN=${NPM_TOKEN_READ_ONLY} \

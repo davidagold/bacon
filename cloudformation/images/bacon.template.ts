@@ -71,7 +71,7 @@ let airflowDockerArtifact = artifacts.docker({
     BuildCommands: [
         "docker build " +
         // `dockerRepo` is resolved by artifacts
-        "-f Dockerfile/airflow.dockerfile " +
+        "-f airflow/Dockerfile " +
         "-t ${dockerRepo}:${!CODEBUILD_RESOLVED_SOURCE_VERSION} " + 
         "--build-arg NPM_TOKEN=${!NPM_TOKEN_READ_ONLY} " +
         "--build-arg MOUNT_POINT=${!MOUNT_POINT} " + 
@@ -160,7 +160,6 @@ class RegistrarImage extends Construct {
                   build: {
                     commands: [
                         "docker build "
-                        + "-f Dockerfile/registrar.dockerfile "
                         + "-t ${DOCKER_REPO}:${CODEBUILD_RESOLVED_SOURCE_VERSION} "
                         + "--build-arg NPM_TOKEN=${NPM_TOKEN_READ_ONLY} "
                         + "."
