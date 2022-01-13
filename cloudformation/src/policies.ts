@@ -1,5 +1,5 @@
 import { Construct } from 'constructs';
-import { IManagedPolicy, ManagedPolicy, PolicyStatement } from "aws-cdk-lib/aws-iam";
+import { IManagedPolicy, ManagedPolicy, PolicyStatement, IRole } from "aws-cdk-lib/aws-iam";
 
 
 export class Policies extends Construct {
@@ -33,5 +33,18 @@ export class Policies extends Construct {
             })
           ]
         */
+    }
+
+    addToRole(role: IRole) {
+        if (this.managedPolicies) {
+            this.managedPolicies.forEach((managedPolicy) => 
+                role.addManagedPolicy(managedPolicy)
+            );
+        }
+        if (this.policyStatements) {
+            this.policyStatements.forEach((policyStatement) => 
+                role.addToPrincipalPolicy(policyStatement)
+            );
+        }
     }
 }

@@ -63,8 +63,10 @@ export class Service extends Construct {
             desiredCount: 1
         });
 
-        props.rds.rdsInstance.connections
-            .allowFrom(this.fargateService, tcpPortRange(5432, 5432))
+        this.fargateService.connections.allowInternally(ec2.Port.tcp(8793));
+        props.rds.rdsInstance.connections.allowFrom(
+            this.fargateService, tcpPortRange(5432, 5432)
+        )
         
         if (props.attachLoadBalancer) {
             let allowedPorts = tcpPortRange(0, 65535)
@@ -92,8 +94,9 @@ export class Service extends Construct {
                 })
                 .setAttribute("deregistration_delay.timeout_seconds", "60");
             
-            this.fargateService.connections
-                .allowFrom(this.loadBalancer, allowedPorts)
+            this.fargateService.connections.allowFrom(
+                this.loadBalancer, allowedPorts
+            )
 
             new CfnOutput(this, 'LoadBalancerDNSName', { 
                 value: this.loadBalancer.loadBalancerDnsName,

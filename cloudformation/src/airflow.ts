@@ -18,6 +18,7 @@ import { LogGroup } from "aws-cdk-lib/aws-logs";
 
 import { SweepTask } from "./sweep-task";
 import { LOG_STREAM_PREFIX_SWEEP } from "../../exp/sweep/config.json"
+import { EfsVolumeInfo } from "../bacon.template";
 
 
 export interface AirflowProps {
@@ -25,7 +26,7 @@ export interface AirflowProps {
   readonly cluster: ecs.ICluster;
   readonly defaultVpcSecurityGroup: ec2.ISecurityGroup;
   readonly subnets: ec2.ISubnet[];
-  readonly fileSystem: efs.FileSystem
+  readonly volumeInfo: EfsVolumeInfo
   readonly sweepTask: SweepTask
   readonly logGroup: LogGroup
 }
@@ -35,15 +36,7 @@ export class Airflow extends Construct {
 
     constructor(parent: Construct, name: string, props: AirflowProps) {
         super(parent, name);
-        
-        let volumeInfo = {
-            containerPath: config.EFS_MOUNT_POINT,
-            volumeName: "SharedVolume",
-            efsVolumeConfiguration: {
-                fileSystemId: props.fileSystem.fileSystemId,
-            }
-        }
-
+    
         const rds = new Rds(this, "RDS-Postgres", {
             defaultVpcSecurityGroup: props.defaultVpcSecurityGroup,
             vpc: props.vpc
@@ -84,7 +77,7 @@ export class Airflow extends Construct {
             AIRFLOW__WEBSERVER__RBAC: "True",
             ADMIN_PASS: adminPassword,
             CLUSTER: props.cluster.clusterName,
-            EFS_FILE_SYSTEM_ID: props.fileSystem.fileSystemId,
+            EFS_FILE_SYSTEM_ID: props.volumeInfo.fileSystem.fileSystemId,
             LOG_STREAM_PREFIX_SWEEP: LOG_STREAM_PREFIX_SWEEP,
             MOUNT_POINT: config.EFS_MOUNT_POINT,
             SECURITY_GROUP: props.defaultVpcSecurityGroup.securityGroupId,
@@ -98,8 +91,10 @@ export class Airflow extends Construct {
             cpu: config.airflow.cpu,
             memoryLimitMiB: config.airflow.memoryLimitMiB,
             volumes: [{
-                name: volumeInfo.volumeName,
-                efsVolumeConfiguration: volumeInfo.efsVolumeConfiguration
+                name: props.volumeInfo.volumeName,
+                efsVolumeConfiguration: {
+                    fileSystemId: props.volumeInfo.fileSystem.fileSystemId
+                }
             }]
         });
 
@@ -140,18 +135,18 @@ export class Airflow extends Construct {
                     memoryLimitMiB: cConfig.cpu
                 })
                 container.addMountPoints({
-                    containerPath: volumeInfo.containerPath,
-                    sourceVolume: volumeInfo.volumeName,
+                    containerPath: props.volumeInfo.containerPath,
+                    sourceVolume: props.volumeInfo.volumeName,
                     readOnly: false
                 })
-                container.addPortMappings(
-                    { containerPort: cConfig.containerPort },
-                    { containerPort: 8793 }
-                );
+                container.addPortMappings({ containerPort: cConfig.containerPort });
+                if (taskName === "worker") {
+                    container.addPortMappings({ containerPort: 8793 })
+                }
                 container.addToExecutionPolicy(new PolicyStatement({
                     effect: Effect.ALLOW,
                     actions: ["elasticfilesystem:ClientMount"],
-                    resources: [props.fileSystem.fileSystemArn]
+                    resources: [props.volumeInfo.fileSystem.fileSystemArn]
                 }))
             })
 
@@ -163,7 +158,9 @@ export class Airflow extends Construct {
             attachLoadBalancer: true,
             rds: rds
         });
-        props.fileSystem.connections.allowDefaultPortFrom(service.fargateService)
+        props.volumeInfo.fileSystem.connections.allowDefaultPortFrom(
+            service.fargateService
+        )
 
         if (config.airflow.createWorkerPool) {
             new Service(this, "WorkerService", {

@@ -12,6 +12,12 @@ import { SweepTask } from "./src/sweep-task"
 import { config } from "../src/config"
 
 
+export interface EfsVolumeInfo {
+    readonly volumeName: string;
+    readonly fileSystem: efs.FileSystem;
+    readonly containerPath: string;
+}
+
 class Bacon extends cdk.Stack {
     
     constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
@@ -32,6 +38,11 @@ class Bacon extends cdk.Stack {
             vpc: vpc,
             securityGroup: efsSecurityGroup
         })
+        let volumeInfo: EfsVolumeInfo = {
+            containerPath: config.EFS_MOUNT_POINT,
+            volumeName: "SharedVolume",
+            fileSystem: fileSystem
+        }
         vpc.privateSubnets.forEach((subnet) => {
             new efs.CfnMountTarget(this, "EfsMountTarget", {
                 fileSystemId: fileSystem.fileSystemId,
@@ -47,7 +58,7 @@ class Bacon extends cdk.Stack {
         new Registrar(this, "Registrar", { fileSystem: fileSystem, vpc: vpc })
 
         let logGroup = new logs.LogGroup(this, "BaconLogs", {
-            logGroupName: "/bacon/logs",
+            logGroupName: "bacon/logs",
             retention: logs.RetentionDays.ONE_MONTH
         })
 
@@ -57,10 +68,10 @@ class Bacon extends cdk.Stack {
             vpc: vpc,
             defaultVpcSecurityGroup: defaultVpcSecurityGroup,
             subnets: vpc.publicSubnets,
-            fileSystem: fileSystem,
+            volumeInfo: volumeInfo,
             logGroup: logGroup,
             sweepTask: new SweepTask(this, "SweepTask", { 
-                vpc, fileSystem, logGroup
+                vpc, volumeInfo, logGroup
             })
         });
     }

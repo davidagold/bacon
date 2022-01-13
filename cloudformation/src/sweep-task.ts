@@ -12,11 +12,12 @@ import { SWEEP_DIR } from "../../src/experiments/sweep"
 import { Aws, Fn } from "aws-cdk-lib";
 
 import { LOG_STREAM_PREFIX_SWEEP } from "../../exp/sweep/config.json"
-
+import { EfsVolumeInfo } from "../bacon.template"
+import { Policies } from "../src/policies"
 
 interface SweepTaskProps {
     vpc: ec2.Vpc
-    fileSystem: efs.FileSystem
+    volumeInfo: EfsVolumeInfo
     logGroup: logs.LogGroup
 }
 
@@ -45,7 +46,13 @@ export class SweepTask extends Construct {
         this.cluster.addAsgCapacityProvider(this.capacityProvider)
 
         this.task = new ecs.Ec2TaskDefinition(this, "SweepTask")
-        this.task.addContainer("SweepContainer", {
+        this.task.addVolume({   // TODO: Factor into Task Construct
+            name: props.volumeInfo.volumeName, 
+            efsVolumeConfiguration: { 
+                fileSystemId: props.volumeInfo.fileSystem.fileSystemId
+            } 
+        })
+        let container = this.task.addContainer("SweepContainer", {
             image: EcrImage.fromEcrRepository(
                 ecr.Repository.fromRepositoryAttributes(
                     this, 
@@ -69,8 +76,15 @@ export class SweepTask extends Construct {
             }),
             // gpuCount: 1
             environment: {
-                EFS_FILE_SYSTEM_ID: props.fileSystem.fileSystemId,
+                EFS_FILE_SYSTEM_ID: props.volumeInfo.fileSystem.fileSystemId,
             }
         })
+        container.addMountPoints({  // TODO: Factor into task construct
+            containerPath: props.volumeInfo.containerPath,
+            sourceVolume: props.volumeInfo.volumeName,
+            readOnly: false
+        })
+
+        new Policies(this, "SweepTaskPolicies").addToRole(this.task.taskRole)
     }
 }
