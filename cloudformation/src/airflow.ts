@@ -19,6 +19,7 @@ import { LogGroup } from "aws-cdk-lib/aws-logs";
 import { SweepTask } from "./sweep-task";
 import { LOG_STREAM_PREFIX_SWEEP } from "../../exp/sweep/config.json"
 import { EfsVolumeInfo } from "../bacon.template";
+import { generateSecret } from "./utils";
 
 
 export interface AirflowProps {
@@ -42,51 +43,63 @@ export class Airflow extends Construct {
             vpc: props.vpc
         });
         
-        const adminPasswordSecret = new Secret(
-            this, "AirflowAdminPasswordSecret", {
-                secretName: Fn.join(
-                    "-", [Aws.STACK_NAME, "AirflowAdminPasswordSecret"]
-                ),
-                generateSecretString: {
-                    secretStringTemplate: JSON.stringify({
-                        username: "admin"
-                    }),
-                    generateStringKey: "password",
-                    excludeUppercase: false,
-                    requireEachIncludedType: false,
-                    includeSpace: false,
-                    excludePunctuation: true,
-                    excludeLowercase: false,
-                    excludeNumbers: false,
-                    passwordLength: 16
-                }
-            }
-        )
-        let adminPassword = adminPasswordSecret
-            .secretValueFromJson("password")
-            .toString()
+        // const adminPasswordSecret = new Secret(
+        //     this, "AirflowAdminPasswordSecret", {
+        //         secretName: Fn.join(
+        //             "-", [Aws.STACK_NAME, "AirflowAdminPasswordSecret"]
+        //         ),
+        //         generateSecretString: {
+        //             secretStringTemplate: JSON.stringify({
+        //                 username: "admin"
+        //             }),
+        //             generateStringKey: "password",
+        //             excludeUppercase: false,
+        //             requireEachIncludedType: false,
+        //             includeSpace: false,
+        //             excludePunctuation: true,
+        //             excludeLowercase: false,
+        //             excludeNumbers: false,
+        //             passwordLength: 16
+        //         }
+        //     }
+        // )
+        // let adminPassword = adminPasswordSecret
+        //     .secretValueFromJson("password")
+        //     .toString()
+
+
         
-        const webserverSecret = new Secret(
-            this, "AirflowWebserverSecret", {
-                secretName: Fn.join(
-                    "-", [Aws.STACK_NAME, "AirflowWebserverSecret"]
-                ),
-                generateSecretString: {
-                    secretStringTemplate: JSON.stringify({}),
-                    generateStringKey: "secret_key",
-                    excludeUppercase: false,
-                    requireEachIncludedType: false,
-                    includeSpace: false,
-                    excludePunctuation: true,
-                    excludeLowercase: false,
-                    excludeNumbers: false,
-                    passwordLength: 16
-                }
-            }
-        )
-        let webserverSecretKey = webserverSecret
-            .secretValueFromJson("secret_key")
-            .toString()
+        // const webserverSecret = new Secret(
+        //     this, "AirflowWebserverSecret", {
+        //         secretName: Fn.join(
+        //             "-", [Aws.STACK_NAME, "AirflowWebserverSecret"]
+        //         ),
+        //         generateSecretString: {
+        //             secretStringTemplate: JSON.stringify({}),
+        //             generateStringKey: "secret_key",
+        //             excludeUppercase: false,
+        //             requireEachIncludedType: false,
+        //             includeSpace: false,
+        //             excludePunctuation: true,
+        //             excludeLowercase: false,
+        //             excludeNumbers: false,
+        //             passwordLength: 16
+        //         }
+        //     }
+        // )
+        // let webserverSecretKey = webserverSecret
+        //     .secretValueFromJson("secret_key")
+        //     .toString()
+
+
+        let adminPassword = generateSecret(this, "AirflowAdminPasswordSecret", {
+            template: { username: "admin" },
+            key: "password"
+        })
+        let webserverSecretKey = generateSecret(this, "AirflowWebserverSecret", {
+            template: {},
+            key: "secret_key"
+        })
 
         const env = {
             AWS_DEFAULT_REGION: Aws.REGION,

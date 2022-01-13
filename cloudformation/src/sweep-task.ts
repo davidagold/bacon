@@ -10,7 +10,7 @@ import { Airflow } from "./airflow"
 import logs = require("aws-cdk-lib/aws-logs");
 import { EcrImage, NetworkMode } from "aws-cdk-lib/aws-ecs";
 import { SWEEP_DIR } from "../../src/experiments/sweep"
-import { Aws, Fn } from "aws-cdk-lib";
+import { Aws, Fn, SecretValue } from "aws-cdk-lib";
 
 import { LOG_STREAM_PREFIX_SWEEP } from "../../exp/sweep/config.json"
 import { EfsVolumeInfo } from "../bacon.template"
@@ -87,6 +87,9 @@ export class SweepTask extends Construct {
             // gpuCount: 1
             environment: {
                 EFS_FILE_SYSTEM_ID: props.volumeInfo.fileSystem.fileSystemId,
+                WANDB_API_KEY: SecretValue.secretsManager(
+                    "WandbApiTokenSecret", { jsonField: "WandbApiKey" }
+                ).toString()
             }
         })
         container.addMountPoints({  // TODO: Factor into task construct

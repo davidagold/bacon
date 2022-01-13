@@ -17,6 +17,7 @@ RUN DEBIAN_FRONTEND=noninteractive pip3 install --upgrade pip && \
     -f https://download.pytorch.org/whl/torch_stable.html
 
 RUN pip3 --no-cache-dir install --upgrade awscli
+RUN pip3 install wandb
 
 ARG MOUNT_POINT
 ENV MOUNT_POINT=${MOUNT_POINT}
