@@ -32,7 +32,8 @@ init_sweep = BashOperator(
     bash_command=cmd_init_sweep,
     env={
         "id": "{{ dag_run.conf['experiment_id'] }}",
-        "config": "{{ dag_run.conf['sweep_config'] }}"
+        "config": "{{ dag_run.conf['sweep_config'] }}",
+        "WANDB_API_KEY": os.environ.get("WANDB_API_KEY")
     }
 )
 
