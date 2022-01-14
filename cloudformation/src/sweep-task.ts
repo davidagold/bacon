@@ -27,6 +27,7 @@ export class SweepTask extends Construct {
     cluster: ecs.Cluster
     task: ecs.Ec2TaskDefinition
     capacityProvider: ecs.AsgCapacityProvider
+    containerName: string
 
     constructor(scope: Construct, id: string, props: SweepTaskProps) {
         super(scope, id)
@@ -62,7 +63,8 @@ export class SweepTask extends Construct {
             }
         })
 
-        let container = this.task.addContainer("SweepContainer", {
+        this.containerName = "SweepContainer"
+        let container = this.task.addContainer(this.containerName, {
             image: EcrImage.fromEcrRepository(
                 ecr.Repository.fromRepositoryAttributes(
                     this, 

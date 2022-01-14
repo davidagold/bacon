@@ -68,6 +68,7 @@ export class Airflow extends Construct {
             SUBNET_IDS: props.subnets.map(subnet => subnet.subnetId).join(","),
             SWEEP_AGENTS_CLUSTER: props.sweepTask.cluster.clusterName,
             SWEEP_AGENTS_CAPACITY_PROVIDER: props.sweepTask.capacityProvider.capacityProviderName,
+            SWEEP_CONTAINER_NAME: props.sweepTask.containerName,
             SWEEP_TASK_DEFINITION_ARN: props.sweepTask.task.taskDefinitionArn,
             WANDB_API_KEY: SecretValue.secretsManager(
                 "WandbApiTokenSecret", { jsonField: "WandbApiKey" }

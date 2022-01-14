@@ -15,12 +15,25 @@ dag = DAG(
     catchup=False
 )
 
-prefix = path.join(os.environ.get("MOUNT_POINT"), "sweeps")
+dir_exp = f"sweeps/${{id}}"
+path_config = f"{dir_exp}/config.yaml"
+
+cmd_init_sweep = (
+    f"mkdir -p ${dir_exp} && " 
+    + f"echo \"${{config}}\" > {path_config} && "
+    + f"cat  && "
+    + "wandb login && "
+    + f"wandb sweep {path_config}"
+)
+
 init_sweep = BashOperator(
     task_id="init_sweep",
     dag=dag,
-    bash_command=f"echo \"wandb sweep {prefix}/${{id}}/config.yaml\"",
-    env={"id": "{{ dag_run.conf['experiment_id'] }}"}
+    bash_command=cmd_init_sweep,
+    env={
+        "id": "{{ dag_run.conf['experiment_id'] }}",
+        "config": "{{ dag_run.conf['sweep_config'] }}"
+    }
 )
 
 run_agents = ECSOperator(
@@ -41,7 +54,18 @@ run_agents = ECSOperator(
         }
     },
     task_definition=os.environ.get("SWEEP_TASK_DEFINITION_ARN"),
-    overrides={},
+    overrides={
+        "containerOverrides": [
+            {
+                "name": os.environ.get("SWEEP_CONTAINER_NAME"),
+                "command": [
+                    "/bin/bash",
+                    "init.sh",
+                    "{{ init_sweep.xcom_pull(task_ids='init_sweep', key='return_value') }}"
+                ]
+            }
+        ]
+    },
     awslogs_group=os.environ.get("AWS_LOG_GROUP"),
     awslogs_region=os.environ.get("AWS_DEFAULT_REGION"),
     awslogs_stream_prefix=path.join(
