@@ -3,3 +3,4 @@ dist
 cloudformation/**/*.js
 venv
 src/**/*.js
+__pycache__

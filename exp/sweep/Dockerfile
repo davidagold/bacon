@@ -26,4 +26,4 @@ RUN mkdir -p ${MOUNT_POINT} && chmod 777 -R ${MOUNT_POINT}
 RUN apt-get install -y crudini
 
 COPY init.sh .
-ENTRYPOINT [ "/bin/bash", "init.sh" ]
+CMD [ "/bin/bash", "init.sh" ]
