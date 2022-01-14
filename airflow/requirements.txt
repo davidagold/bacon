@@ -4,4 +4,3 @@ concurrent-log-handler==0.9.19
 plyvel==1.4.0
 apache-airflow==2.2.3
 apache-airflow-providers-amazon==2.6.0
-wandb==0.12.9
