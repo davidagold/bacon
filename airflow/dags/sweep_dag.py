@@ -19,9 +19,9 @@ dir_exp = f"sweeps/${{id}}"
 path_config = f"{dir_exp}/config.yaml"
 
 cmd_init_sweep = (
-    f"mkdir -p ${dir_exp} && " 
-    + f"echo \"${{config}}\" > {path_config} && "
-    + f"cat  && "
+    f"mkdir -p {dir_exp} && " 
+    + f"echo ${{config}} > {path_config} && "
+    + f"cat {path_config} && "
     + "wandb login && "
     + f"wandb sweep {path_config}"
 )
