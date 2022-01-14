@@ -3,7 +3,7 @@ FROM python:3.8-slim
 WORKDIR /usr/app
 
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
-    apt install -y git curl build-essential binutils nfs-common
+    apt install -y git curl build-essential binutils
 
 RUN git clone https://github.com/aws/efs-utils /usr/tmp/efs-utils && \
     (cd /usr/tmp/efs-utils && ./build-deb.sh && \ 

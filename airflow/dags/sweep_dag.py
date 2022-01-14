@@ -22,8 +22,8 @@ cmd_init_sweep = (
     f"mkdir -p {dir_exp} && " 
     + f"echo ${{config}} > {path_config} && "
     + f"cat {path_config} && "
-    + "wandb login && "
-    + f"wandb sweep {path_config}"
+    + "/home/airflow/.local/bin/wandb login && "
+    + f"/home/airflow/.local/bin/wandb sweep {path_config}"
 )
 
 init_sweep = BashOperator(
