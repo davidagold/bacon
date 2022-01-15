@@ -1,6 +1,6 @@
 # Bacon
-[Bacon](https://en.wikipedia.org/wiki/Francis_Bacon) is a framework for orchestrating machine learning experiments.
-It includes an AWS CloudFormation template that provisions for:
+[Bacon](https://en.wikipedia.org/wiki/Francis_Bacon) (WIP) is a framework for orchestrating machine learning experiments.
+It consists of:
 - An Airflow service running on ECS Fargate,
 - EC2 task instances on which to run Weights & Biases hyperparameter sweeps.
 
