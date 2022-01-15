@@ -5,7 +5,8 @@ from os import path
 from airflow import DAG
 from airflow.providers.amazon.aws.operators.ecs import ECSOperator
 from airflow.operators.bash import BashOperator
-
+from airflow.operators.python import task
+import wandb
 
 dag = DAG(
     dag_id="sweep_experiment_dag",
@@ -15,27 +16,19 @@ dag = DAG(
     catchup=False
 )
 
-dir_exp = f"sweeps/${{id}}"
-path_config = f"{dir_exp}/config.yaml"
 
-cmd_init_sweep = (
-    f"mkdir -p {dir_exp} && " 
-    + f"echo ${{config}} > {path_config} && "
-    + f"cat {path_config} && "
-    + "/home/airflow/.local/bin/wandb login && "
-    + f"/home/airflow/.local/bin/wandb sweep {path_config}"
-)
-
-init_sweep = BashOperator(
+login_wandb = BashOperator(
     task_id="init_sweep",
     dag=dag,
-    bash_command=cmd_init_sweep,
-    env={
-        "id": "{{ dag_run.conf['experiment_id'] }}",
-        "config": "{{ dag_run.conf['sweep_config'] }}",
-        "WANDB_API_KEY": os.environ.get("WANDB_API_KEY")
-    }
+    bash_command="/home/airflow/.local/bin/wandb login",
+    env={ "WANDB_API_KEY": os.environ.get("WANDB_API_KEY") }
 )
+
+
+@task(op_args=["{{ dag_run.conf['sweep_config']}}"])
+def init_sweep(sweep_config):
+    return wandb.sweep(sweep_config)
+
 
 run_agents = ECSOperator(
     task_id="run_agents",
@@ -75,4 +68,5 @@ run_agents = ECSOperator(
     )
 )
 
-init_sweep >> run_agents
+
+login_wandb >> init_sweep() >> run_agents
