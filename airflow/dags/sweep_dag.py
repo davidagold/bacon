@@ -29,8 +29,6 @@ login_wandb = BashOperator(
 
 @task(task_id="init_sweep")
 def _init_sweep(sweep_config):
-    print(sweep_config)
-    print(type(sweep_config))
     return wandb.sweep(json.loads(sweep_config.replace("'", "\"")))
 
 init_sweep = _init_sweep(sweep_config="{{ dag_run.conf['sweep_config'] }}")
@@ -61,7 +59,7 @@ run_agents = ECSOperator(
                 "command": [
                     "/bin/bash",
                     "init.sh",
-                    "{{ init_sweep.xcom_pull(task_ids='init_sweep', key='return_value') }}"
+                    init_sweep.xcom_pull(task_ids="init_sweep", key="return_value")
                 ]
             }
         ]
