@@ -15,7 +15,8 @@ dag = DAG(
     default_view="tree",
     schedule_interval=None,
     start_date=datetime.datetime(2022, 1, 1),
-    catchup=False
+    catchup=False,
+    render_template_as_native_obj=True
 )
 
 
@@ -29,7 +30,7 @@ login_wandb = BashOperator(
 
 @task(task_id="init_sweep")
 def _init_sweep(sweep_config):
-    return wandb.sweep(json.loads(sweep_config.replace("'", "\"")))
+    return wandb.sweep(sweep_config)
 
 init_sweep = _init_sweep(sweep_config="{{ dag_run.conf['sweep_config'] }}")
 
@@ -59,7 +60,7 @@ run_agents = ECSOperator(
                 "command": [
                     "/bin/bash",
                     "init.sh",
-                    init_sweep.xcom_pull(task_ids="init_sweep", key="return_value")
+                    "{{ init_sweep.xcom_pull(task_ids='init_sweep', key='return_value') }}"
                 ]
             }
         ]
