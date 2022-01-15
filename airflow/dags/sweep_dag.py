@@ -5,8 +5,9 @@ from os import path
 from airflow import DAG
 from airflow.providers.amazon.aws.operators.ecs import ECSOperator
 from airflow.operators.bash import BashOperator
-from airflow.operators.python import task
+from airflow.decorators import task
 import wandb
+
 
 dag = DAG(
     dag_id="sweep_experiment_dag",
@@ -25,7 +26,7 @@ login_wandb = BashOperator(
 )
 
 
-@task(op_args=["{{ dag_run.conf['sweep_config']}}"])
+@task(task_id="init_sweep", op_args=["{{ dag_run.conf['sweep_config']}}"])
 def init_sweep(sweep_config):
     return wandb.sweep(sweep_config)
 
