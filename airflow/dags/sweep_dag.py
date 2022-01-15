@@ -30,7 +30,8 @@ login_wandb = BashOperator(
 @task(task_id="init_sweep")
 def _init_sweep(sweep_config):
     print(sweep_config)
-    return wandb.sweep(json.loads(sweep_config))
+    print(type(sweep_config))
+    return wandb.sweep(json.loads(sweep_config.replace("'", "\"")))
 
 init_sweep = _init_sweep(sweep_config="{{ dag_run.conf['sweep_config'] }}")
 
