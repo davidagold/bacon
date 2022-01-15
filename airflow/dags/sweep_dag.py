@@ -1,6 +1,7 @@
 import datetime
 import os
 from os import path
+import json
 
 from airflow import DAG
 from airflow.providers.amazon.aws.operators.ecs import ECSOperator
@@ -28,9 +29,10 @@ login_wandb = BashOperator(
 
 @task(task_id="init_sweep")
 def _init_sweep(sweep_config):
-    return wandb.sweep(sweep_config)
+    print(sweep_config)
+    return wandb.sweep(json.loads(sweep_config))
 
-init_sweep = _init_sweep(sweep_config="{{ dag_run.conf['sweep_config']}}")
+init_sweep = _init_sweep(sweep_config="{{ dag_run.conf['sweep_config'] }}")
 
 
 run_agents = ECSOperator(
