@@ -26,9 +26,11 @@ login_wandb = BashOperator(
 )
 
 
-@task(task_id="init_sweep", op_args=["{{ dag_run.conf['sweep_config']}}"])
-def init_sweep(sweep_config):
+@task(task_id="init_sweep")
+def _init_sweep(sweep_config):
     return wandb.sweep(sweep_config)
+
+init_sweep = _init_sweep("{{ dag_run.conf['sweep_config']}}")
 
 
 run_agents = ECSOperator(
@@ -70,4 +72,4 @@ run_agents = ECSOperator(
 )
 
 
-login_wandb >> init_sweep() >> run_agents
+login_wandb >> init_sweep >> run_agents
