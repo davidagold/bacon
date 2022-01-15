@@ -28,13 +28,14 @@ login_wandb = BashOperator(
     env={ "WANDB_API_KEY": os.environ.get("WANDB_API_KEY") }
 )
 
-
 @task(task_id="init_sweep")
 def _init_sweep(sweep_config) -> str:
     sweep_id = wandb.sweep(sweep_config)
     return sweep_id
 
 init_sweep = _init_sweep(sweep_config="{{ dag_run.conf['sweep_config'] }}")
+
+login_wandb >> init_sweep 
 
 
 run_agents = ECSOperator(
@@ -70,6 +71,3 @@ run_agents = ECSOperator(
         "SweepContainer"    # TODO: Derive from config
     )
 )
-
-
-login_wandb >> init_sweep >> run_agents
