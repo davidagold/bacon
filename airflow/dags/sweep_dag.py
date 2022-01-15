@@ -19,7 +19,7 @@ dag = DAG(
 
 
 login_wandb = BashOperator(
-    task_id="init_sweep",
+    task_id="login_wandb",
     dag=dag,
     bash_command="/home/airflow/.local/bin/wandb login",
     env={ "WANDB_API_KEY": os.environ.get("WANDB_API_KEY") }
