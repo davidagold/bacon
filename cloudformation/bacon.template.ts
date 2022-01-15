@@ -5,10 +5,10 @@ import ecs = require('aws-cdk-lib/aws-ecs');
 import efs = require("aws-cdk-lib/aws-efs")
 import cdk = require('aws-cdk-lib');
 import logs = require("aws-cdk-lib/aws-logs")
-import { Aws, Fn, CfnOutput } from 'aws-cdk-lib';
+import { Aws, Fn, CfnOutput, CfnParameter } from 'aws-cdk-lib';
 import { Airflow } from "./src/airflow";
 import { Registrar } from "./src/registrar"
-import { SweepTask } from "./src/sweep-task"
+import { SweepTask, SweepTaskInstanceType } from "./src/sweep-task"
 import { config } from "../src/config"
 
 
@@ -23,6 +23,12 @@ class Bacon extends cdk.Stack {
     constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {
         super(scope, id, props);
         cdk.Tags.of(scope).add("Stack", cdk.Aws.STACK_NAME);
+
+        let sweepTaskInstanceType = new CfnParameter(this, "SweepTaskInstanceType", {
+            type: "String",
+            allowedValues: ["c5.9xlarge", "p2.8xlarge"],
+            default: "c5.9xlarge"
+        })
 
         let vpc = new ec2.Vpc(this, 'Vpc', {
             maxAzs: 2,
@@ -85,7 +91,11 @@ class Bacon extends cdk.Stack {
             volumeInfo: volumeInfo,
             logGroup: logGroup,
             sweepTask: new SweepTask(this, "SweepTask", { 
-                vpc, volumeInfo, logGroup, defaultSecurityGroup: defaultVpcSecurityGroup
+                vpc, 
+                volumeInfo, 
+                logGroup, 
+                defaultSecurityGroup: defaultVpcSecurityGroup,
+                instanceType: sweepTaskInstanceType.toString() as SweepTaskInstanceType
             })
         });
     }

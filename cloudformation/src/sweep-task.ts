@@ -16,11 +16,15 @@ import { LOG_STREAM_PREFIX_SWEEP } from "../../exp/sweep/config.json"
 import { EfsVolumeInfo } from "../bacon.template"
 import { Policies } from "../src/policies"
 
+
+export type SweepTaskInstanceType = "c5.9xlarge" | "p2.8xlarge"
+
 interface SweepTaskProps {
     vpc: ec2.Vpc
     volumeInfo: EfsVolumeInfo
     logGroup: logs.LogGroup
     defaultSecurityGroup: ec2.SecurityGroup
+    instanceType: SweepTaskInstanceType
 }
 
 export class SweepTask extends Construct {
@@ -35,8 +39,7 @@ export class SweepTask extends Construct {
         let autoScalingGroup = new autoscaling.AutoScalingGroup(this, 'ASG', {
             vpc: props.vpc,
             securityGroup: props.defaultSecurityGroup,
-            // instanceType: new ec2.InstanceType('p2.8xlarge'),
-            instanceType: new ec2.InstanceType('c5.9xlarge'),
+            instanceType: new ec2.InstanceType(props.instanceType),
             machineImage: ecs.EcsOptimizedImage.amazonLinux2(),
             minCapacity: 0,
             maxCapacity: 1,
