@@ -1,6 +1,6 @@
 SHELL :/bin/bash
 
-.PHONY: image deploy-images
+.PHONY: image-airflow image-registrar deploy-images deploy
 
 env=staging
 
@@ -12,12 +12,10 @@ image-airflow:
 		airflow
 
 image-registrar:
-	DOCKER_BUILDKIT=0 docker build \
-		-f Dockerfile \
-		-t bacon-registrar:latest \
-		--build-arg MOUNT_POINT="/mnt/efs" \
-		--build-arg NPM_TOKEN=${NPM_TOKEN_READ_ONLY} \
-		.
+	DOCKER_BUILDKIT=0 docker build -t bacon-registrar:latest .
 
 deploy-images:
 	cdk deploy -a "npx ts-node --prefer-ts-exts cfn/images.ts" --context env=$(env)
+
+deploy:
+	cdk deploy --context env=$(env)

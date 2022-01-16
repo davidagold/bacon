@@ -14,6 +14,6 @@ ENV MOUNT_POINT=${MOUNT_POINT}
 ARG NPM_TOKEN
 ENV NPM_TOKEN=${NPM_TOKEN}
 RUN echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > .npmrc
-RUN npm install && npm run build:registrar
+RUN npm install && npm run build
 
 CMD [ "dist/registrar/handler.main" ]
