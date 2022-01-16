@@ -101,7 +101,7 @@ class imageCi extends Construct {
             }
         })
     
-        new codebuild.Project(this, "SweepExperimentProject", {
+        new codebuild.Project(this, `CbProject-${options.imagePrefix}`, {
             source: gitHubSource,
             environment: {
                 buildImage: codebuild.LinuxBuildImage.STANDARD_4_0,
