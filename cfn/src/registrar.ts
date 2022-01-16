@@ -37,7 +37,7 @@ export class Registrar extends Construct {
         let registrarImageRepo = ecr.Repository.fromRepositoryAttributes(
             this, "registrarImageRepository", {
                 repositoryArn: Fn.importValue(
-                    registrarDkrRepoName + "DkrRepositoryArn"
+                    `${registrarDkrRepoName}-DkrRepositoryArn`
                 ),
                 repositoryName: registrarDkrRepoName
             }

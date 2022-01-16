@@ -90,7 +90,7 @@ export class Airflow extends Construct {
         let airflowImageRepo = ecr.Repository.fromRepositoryAttributes(
             this, "AirflowImageRepository", {
                 repositoryArn: Fn.importValue(
-                    airflowDkrRepoName + "DkrRepositoryArn"
+                    `${airflowDkrRepoName}-DkrRepositoryArn`
                 ),
                 repositoryName: airflowDkrRepoName
             }
