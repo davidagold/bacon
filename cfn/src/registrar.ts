@@ -33,18 +33,13 @@ export class Registrar extends Construct {
             },
         })
 
+        let registrarDkrRepoName = `bacon-images-${this.node.tryGetContext("env")}-registrar`
         let registrarImageRepo = ecr.Repository.fromRepositoryAttributes(
             this, "registrarImageRepository", {
                 repositoryArn: Fn.importValue(
-                    Fn.join("-", [
-                        Aws.STACK_NAME,
-                        "images",
-                        "RegistrarDkrRepositoryArn"
-                    ])
+                    registrarDkrRepoName + "DkrRepositoryArn"
                 ),
-                repositoryName: Fn.join(
-                    "-", [Aws.STACK_NAME, "images", "registrar"] // TODO: import this
-                )
+                repositoryName: registrarDkrRepoName
             }
         )
 

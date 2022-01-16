@@ -3,7 +3,7 @@ import ecs = require("aws-cdk-lib/aws-ecs")
 import ec2 = require("aws-cdk-lib/aws-ec2")
 
 import { config, ContainerConfig } from "../../src/config";
-import { EfsVolumeInfo } from "../bacon.template"
+import { EfsVolumeInfo } from "../bacon"
 import { Policies } from "../src/policies"
 
 

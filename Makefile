@@ -1,6 +1,8 @@
 SHELL :/bin/bash
 
-.PHONY: image
+.PHONY: image deploy-images
+
+env=staging
 
 image-airflow:
 	DOCKER_BUILDKIT=0 docker build \
@@ -17,10 +19,5 @@ image-registrar:
 		--build-arg NPM_TOKEN=${NPM_TOKEN_READ_ONLY} \
 		.
 
-image-sweep:
-	DOCKER_BUILDKIT=0 docker build \
-		-f exp/sweep/Dockerfile \
-		-t bacon-sweep:latest \
-		--build-arg MOUNT_POINT="/mnt/efs" \
-		--build-arg NPM_TOKEN=${NPM_TOKEN_READ_ONLY} \
-		exp/sweep
+deploy-images:
+	cdk deploy -a "npx ts-node --prefer-ts-exts cfn/images.ts" --context env=$(env)

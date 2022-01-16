@@ -5,9 +5,7 @@
   "main": "dist/cloudformation/bacon.cdk.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build:cfn": "node_modules/typescript/bin/tsc --resolveJsonModule -p ./tsconfig/cloudformation.json",
-    "build:registrar": "node_modules/typescript/bin/tsc -p ./tsconfig/registrar.json",
-    "build": "npm run build:cfn && npm run build:src"
+    "build": "node_modules/typescript/bin/tsc --resolveJsonModule"
   },
   "repository": {
     "type": "git",

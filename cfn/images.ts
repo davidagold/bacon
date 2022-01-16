@@ -128,7 +128,7 @@ class Images extends Stack {
         })
 
         new imageCi(this, "AirflowImageCi", {
-            imagePrefix: "registrar",
+            imagePrefix: "airflow",
             gitHubOwner: "dag-org",
             gitHubRepo: "bacon",
             buildCommands: [
@@ -153,14 +153,11 @@ class Images extends Stack {
             gitHubRepo: "bacon",
             buildCommands: [
                 "docker build "
-                + "-f exp/Dockerfile "
                 + "-t ${DOCKER_REPO}:${CODEBUILD_RESOLVED_SOURCE_VERSION} "
                 + "."
             ],
             codebuildServiceRole: serviceRole
         })
-
-        
     }
 }
 
