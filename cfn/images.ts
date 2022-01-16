@@ -135,7 +135,7 @@ class Images extends Stack {
                 "docker build " +
                 "-f airflow/Dockerfile " +
                 "-t ${DOCKER_REPO}:${CODEBUILD_RESOLVED_SOURCE_VERSION} " + 
-                "--build-arg MOUNT_POINT=${!MOUNT_POINT} " + 
+                "--build-arg MOUNT_POINT=${MOUNT_POINT} " +
                 "airflow"
             ],
             environmentVariables: {

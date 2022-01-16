@@ -5,8 +5,8 @@ RUN npm install -g npm
 WORKDIR ${LAMBDA_TASK_ROOT}
 
 COPY package* ./
-COPY tsconfig/ ./tsconfig/
 COPY src/ ./src/
+COPY tsconfig.json .
 
 ARG MOUNT_POINT
 ENV MOUNT_POINT=${MOUNT_POINT}
