@@ -73,11 +73,10 @@ export class SweepTask extends Construct {
                     this, 
                     "SweepTaskDockerRepo", 
                     {
-                        repositoryName: Fn.join("-", [Aws.STACK_NAME, "images", "sweep"]),
+                        // repositoryName: Fn.join("-", [Aws.STACK_NAME, "images", "sweep"]),
+                        repositoryName: Fn.join("-", ["unet", "images", "staging"]), // TODO: Parametrize
                         repositoryArn:  Fn.importValue(Fn.join("-", [
-                            Aws.STACK_NAME,
-                            "images",
-                            "SweepTaskDkrRepositoryArn"
+                            "unet", "images", "staging", "SweepTaskDkrRepositoryArn"
                         ]))
                     }
                 ), 
