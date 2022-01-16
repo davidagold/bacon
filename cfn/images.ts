@@ -134,7 +134,7 @@ class Images extends Stack {
             buildCommands: [
                 "docker build " +
                 "-f airflow/Dockerfile " +
-                "-t ${DOCKER_REPO}:${!CODEBUILD_RESOLVED_SOURCE_VERSION} " + 
+                "-t ${DOCKER_REPO}:${CODEBUILD_RESOLVED_SOURCE_VERSION} " + 
                 "--build-arg MOUNT_POINT=${!MOUNT_POINT} " + 
                 "airflow"
             ],
