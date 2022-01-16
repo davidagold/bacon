@@ -13,7 +13,7 @@ import { SWEEP_DIR } from "../../src/experiments/sweep"
 import { Aws, Fn, SecretValue } from "aws-cdk-lib";
 
 import { LOG_STREAM_PREFIX_SWEEP } from "../../exp/sweep/config.json"
-import { EfsVolumeInfo } from "../bacon.template"
+import { EfsVolumeInfo } from "../bacon"
 import { Policies } from "../src/policies"
 
 

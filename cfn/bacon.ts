@@ -1,11 +1,10 @@
 // Drawing from https://github.com/PracticeVelocity/Airflow-on-Fargate
-import { Template } from "aws-cdk-lib/assertions";
 import ec2 = require('aws-cdk-lib/aws-ec2');
 import ecs = require('aws-cdk-lib/aws-ecs');
 import efs = require("aws-cdk-lib/aws-efs")
 import cdk = require('aws-cdk-lib');
 import logs = require("aws-cdk-lib/aws-logs")
-import { Aws, Fn, CfnOutput, CfnParameter } from 'aws-cdk-lib';
+import { App, Aws, Fn, CfnOutput, CfnParameter } from 'aws-cdk-lib';
 import { Airflow } from "./src/airflow";
 import { Registrar } from "./src/registrar"
 import { SweepTask, SweepTaskInstanceType } from "./src/sweep-task"
@@ -102,6 +101,5 @@ class Bacon extends cdk.Stack {
 }
 
 
-module.exports = Template
-    .fromStack(new Bacon(new cdk.App(), 'Bacon'))
-    .toJSON()
+const app = new App();
+new Bacon(app, `bacon-${app.node.tryGetContext("env")}`)

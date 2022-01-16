@@ -1,0 +1,1 @@
+{"experiment_id": "test", "sweep_config": "program: train.py\nmethod: bayes\nmetric:\n  name: validation_loss\n  goal: minimize\nparameters:\n  learning_rate:\n    min: 0.0001\n    max: 0.1\n  optimizer:\n    values: [\"adam\", \"sgd\"]"}

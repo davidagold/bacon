@@ -4,3 +4,5 @@ cloudformation/**/*.js
 venv
 src/**/*.js
 __pycache__
+.cdk.staging
+cdk.out

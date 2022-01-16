@@ -1,4 +1,7 @@
 import { Fn, Aws } from "aws-cdk-lib"
+import ecr = require("aws-cdk-lib/aws-ecr");
+import iam = require("aws-cdk-lib/aws-iam");
+import codebuild = require("aws-cdk-lib/aws-codebuild")
 import { Secret } from "aws-cdk-lib/aws-secretsmanager";
 import { Construct } from "constructs";
 
