@@ -15,7 +15,7 @@ import { Effect, PolicyStatement } from "aws-cdk-lib/aws-iam";
 import { LogGroup } from "aws-cdk-lib/aws-logs";
 
 import { SweepTask } from "./sweep-task";
-import { LOG_STREAM_PREFIX_SWEEP } from "../../exp/sweep/config.json"
+import { LOG_STREAM_PREFIX_SWEEP } from "../../src/exp/sweep/config.json"
 import { EfsVolumeInfo } from "../bacon";
 import { generateSecret } from "./utils";
 

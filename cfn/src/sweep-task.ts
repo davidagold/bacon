@@ -12,7 +12,7 @@ import { EcrImage, NetworkMode } from "aws-cdk-lib/aws-ecs";
 import { SWEEP_DIR } from "../../src/experiments/sweep"
 import { Aws, Fn, SecretValue } from "aws-cdk-lib";
 
-import { LOG_STREAM_PREFIX_SWEEP } from "../../exp/sweep/config.json"
+import { LOG_STREAM_PREFIX_SWEEP } from "../../src/exp/sweep/config.json"
 import { EfsVolumeInfo } from "../bacon"
 import { Policies } from "../src/policies"
 
