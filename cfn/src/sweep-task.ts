@@ -17,14 +17,13 @@ import { EfsVolumeInfo } from "../bacon"
 import { Policies } from "../src/policies"
 
 
-export type SweepTaskInstanceType = "c5.9xlarge" | "p2.8xlarge"
+const INSTANCE_TYPES = ["c5.9xlarge", "p2.8xlarge"]
 
 interface SweepTaskProps {
     vpc: ec2.Vpc
     volumeInfo: EfsVolumeInfo
     logGroup: logs.LogGroup
     defaultSecurityGroup: ec2.SecurityGroup
-    instanceType: SweepTaskInstanceType
 }
 
 export class SweepTask extends Construct {
@@ -36,10 +35,15 @@ export class SweepTask extends Construct {
     constructor(scope: Construct, id: string, props: SweepTaskProps) {
         super(scope, id)
 
+        let instanceType = scope.node.tryGetContext("sweepTaskInstanceType")
+        if (INSTANCE_TYPES.findIndex(t => t === instanceType) < 0) {
+            throw new Error(`context.sweepTaskInstanceType must be from ${INSTANCE_TYPES}`)
+        }
+
         let autoScalingGroup = new autoscaling.AutoScalingGroup(this, 'ASG', {
             vpc: props.vpc,
             securityGroup: props.defaultSecurityGroup,
-            instanceType: new ec2.InstanceType(props.instanceType),
+            instanceType: new ec2.InstanceType(instanceType),
             machineImage: ecs.EcsOptimizedImage.amazonLinux2(),
             minCapacity: 0,
             maxCapacity: 1,
@@ -73,7 +77,6 @@ export class SweepTask extends Construct {
                     this, 
                     "SweepTaskDockerRepo", 
                     {
-                        // repositoryName: Fn.join("-", [Aws.STACK_NAME, "images", "sweep"]),
                         repositoryName: Fn.join("-", ["unet", "images", "staging"]), // TODO: Parametrize
                         repositoryArn:  Fn.importValue(Fn.join("-", [
                             "unet", "images", "staging", "SweepTaskDkrRepositoryArn"
