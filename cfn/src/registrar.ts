@@ -19,20 +19,6 @@ export class Registrar extends Construct {
     constructor(scope: Construct, id: string, props: RegistrarProps) {
         super(scope, id)
 
-        let accessPoint = new efs.AccessPoint(this, "RegistrarAccessPoint", {
-            fileSystem: props.fileSystem,
-            path: "/efs",   // TODO: Derive from config
-            posixUser: {
-                gid: "1001",
-                uid: "1001"
-            },
-            createAcl: {
-                ownerUid: '1001',
-                ownerGid: '1001',
-                permissions: '750',
-            },
-        })
-
         let registrarDkrRepoName = `bacon-images-${this.node.tryGetContext("env")}-registrar`
         let registrarImageRepo = ecr.Repository.fromRepositoryAttributes(
             this, "registrarImageRepository", {
@@ -49,31 +35,9 @@ export class Registrar extends Construct {
             ),
             runtime: lambda.Runtime.FROM_IMAGE,
             handler: lambda.Handler.FROM_IMAGE,
-            filesystem: lambda.FileSystem.fromEfsAccessPoint(
-                accessPoint, config.EFS_MOUNT_POINT
-            ),
             vpc: props.vpc,
             role: new iam.Role(this, "RegistrarFnServiceRole", {
                 assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
-                inlinePolicies: {
-                    EfsPolicy: new iam.PolicyDocument({
-                        statements: [
-                            new iam.PolicyStatement({
-                                sid: "CloudWatchLogsStatement",
-                                effect: iam.Effect.ALLOW,
-                                actions: [
-                                    "elasticfilesystem:ClientMount",
-                                    "elasticfilesystem:ClientWrite",
-                                    "elasticfilesystem:DescribeMountTargets",
-                                ],
-                                resources: [
-                                    props.fileSystem.fileSystemArn,
-                                    accessPoint.accessPointArn
-                                ]
-                            })
-                        ]
-                    })
-                },
                 managedPolicies: [
                     iam.ManagedPolicy.fromManagedPolicyArn(
                         this, 
@@ -83,6 +47,5 @@ export class Registrar extends Construct {
                 ]
             })
         })
-        props.fileSystem.connections.allowDefaultPortFrom(this.registrarFn)
     }    
 }
