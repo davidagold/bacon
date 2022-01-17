@@ -77,7 +77,7 @@ export class SweepTask extends Construct {
                     this, 
                     "SweepTaskDockerRepo", 
                     {
-                        repositoryName: Fn.join("-", ["unet", "images", "staging"]), // TODO: Parametrize
+                        repositoryName: Fn.join("-", ["unet", "images", "staging", "sweep"]), // TODO: Parametrize
                         repositoryArn:  Fn.importValue(Fn.join("-", [
                             "unet", "images", "staging", "SweepTaskDkrRepositoryArn"
                         ]))
