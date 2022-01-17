@@ -23,6 +23,7 @@
         "@aws-cdk/aws-lambda:recognizeVersionProps": true,
         "@aws-cdk/aws-cloudfront:defaultSecurityPolicyTLSv1.2_2021": true,
         "sweepTaskInstanceType": "c5.9xlarge",
-        "sweepTaskAsgKeyName": "id_rsa"
+        "sweepTaskAsgKeyName": "id_rsa",
+        "sweepTaskImageTag": "latest"
     }
 }

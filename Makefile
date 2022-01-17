@@ -3,6 +3,7 @@ SHELL :/bin/bash
 .PHONY: image-airflow image-registrar deploy-images deploy
 
 env=staging
+tag=$(shell cd ../unet && git rev-parse HEAD)
 
 image-airflow:
 	DOCKER_BUILDKIT=0 docker build \
@@ -18,4 +19,4 @@ deploy-images:
 	cdk deploy -a "npx ts-node --prefer-ts-exts cfn/images.ts" --context env=$(env)
 
 deploy:
-	cdk deploy --context env=$(env)
+	cdk deploy --context env=$(env) --context sweepTaskImageTag=$(tag)

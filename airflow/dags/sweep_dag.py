@@ -59,7 +59,12 @@ run_agents = ECSOperator(
         "containerOverrides": [
             {
                 "name": os.environ.get("SWEEP_CONTAINER_NAME"),
-                "command": ["/bin/bash", "exp/init.sh", init_sweep]
+                "command": [
+                    "/bin/bash",
+                    "exp/init.sh",
+                    os.environ.get("WANDB_API_KEY"),
+                    init_sweep
+                ]
             }
         ]
     },

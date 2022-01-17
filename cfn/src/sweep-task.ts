@@ -85,7 +85,7 @@ export class SweepTask extends Construct {
                         ]))
                     }
                 ), 
-                "latest"
+                this.node.tryGetContext("sweepTaskImageTag")
             ),
             cpu: 1024 * 4,
             // memoryReservationMiB: 1024 * 32,
