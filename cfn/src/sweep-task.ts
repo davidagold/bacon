@@ -47,14 +47,16 @@ export class SweepTask extends Construct {
             machineImage: ecs.EcsOptimizedImage.amazonLinux2(),
             minCapacity: 0,
             maxCapacity: 1,
-            associatePublicIpAddress: true,
-            vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT }
+            vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
+            keyName: this.node.tryGetContext("sweepTaskAsgKeyName")
         });
         this.capacityProvider = new ecs.AsgCapacityProvider(
             this,
             "AsgCapacityProvider", 
             { autoScalingGroup }
         )
+        autoScalingGroup.connections.allowFromAnyIpv4(ec2.Port.tcp(22))
+
         this.cluster = new ecs.Cluster(this, "SweepCluster", { vpc: props.vpc })
         this.cluster.addAsgCapacityProvider(this.capacityProvider)
 

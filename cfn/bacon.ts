@@ -56,13 +56,6 @@ class Bacon extends cdk.Stack {
             volumeName: "SharedVolume",
             fileSystem: fileSystem
         }
-        vpc.privateSubnets.forEach((subnet) => {
-            new efs.CfnMountTarget(this, "EfsMountTarget", {
-                fileSystemId: fileSystem.fileSystemId,
-                securityGroups: [efsSecurityGroup.securityGroupId],
-                subnetId: subnet.subnetId
-            })
-        })
         new CfnOutput(this, "EfsFileSystemId", {
             value: fileSystem.fileSystemId,
             exportName: Fn.join("-", [Aws.STACK_NAME, "EfsFileSystemId"])
