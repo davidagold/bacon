@@ -25,7 +25,7 @@ class Bacon extends cdk.Stack {
 
         let vpc = new ec2.Vpc(this, 'Vpc', {
             maxAzs: 2,
-            natGateways: 0,
+            natGateways: 1,
             subnetConfiguration: [
                 {
                     name: "public",
@@ -36,7 +36,7 @@ class Bacon extends cdk.Stack {
                 {
                     name: "private",
                     cidrMask: 24,
-                    subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
+                    subnetType: ec2.SubnetType.PRIVATE_WITH_NAT,
                 }
             ]
         });

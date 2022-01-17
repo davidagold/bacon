@@ -48,7 +48,7 @@ export class SweepTask extends Construct {
             minCapacity: 0,
             maxCapacity: 1,
             associatePublicIpAddress: true,
-            vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC }
+            vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT }
         });
         this.capacityProvider = new ecs.AsgCapacityProvider(
             this,
