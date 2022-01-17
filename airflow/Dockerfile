@@ -6,9 +6,10 @@ ENV AIRFLOW_USER=airflow
 WORKDIR ${AIRFLOW_HOME}
 USER root
 
-RUN apt-get update && apt-get install -y python3-pip \
-    libcurl4-gnutls-dev \
-    librtmp-dev
+RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-key 467B942D3A79BD29 && \
+    apt-get update && apt-get install -y python3-pip \
+        libcurl4-gnutls-dev \
+        librtmp-dev
 RUN pip install --upgrade apache-airflow-providers-google
 
 ARG MOUNT_POINT
