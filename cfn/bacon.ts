@@ -73,7 +73,7 @@ class Bacon extends cdk.Stack {
             cluster: cluster,
             vpc: vpc,
             defaultVpcSecurityGroup: defaultVpcSecurityGroup,
-            subnets: vpc.publicSubnets,
+            subnets: vpc.privateSubnets,
             volumeInfo: volumeInfo,
             logGroup: logGroup,
             sweepTask: new SweepTask(this, "SweepTask", { 
