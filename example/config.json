@@ -3,6 +3,7 @@
     "sweep_config": {
         "name" : "my-sweep",
         "method" : "random",
+        "program": "exp/run.py",
         "parameters" : {
             "epochs" : {
                 "values" : [10, 20, 50]

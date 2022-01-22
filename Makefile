@@ -24,3 +24,8 @@ deploy:
 		--context env=$(env) \
 		--context sweepTaskImageTag=$(sweep_task_tag) \
 		--context airflowTag=$(airflow_tag)
+
+test-dag:
+	SUBNET_IDS="a,b" \
+	AWS_LOG_STREAM_PREFIX_SWEEP="bacon/sweeps" \
+	python airflow/dags/sweep_dag.py

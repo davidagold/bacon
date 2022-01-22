@@ -11,6 +11,8 @@ from airflow.decorators import task
 import wandb
 
 
+NUM_SWEEP_TASKS = 8
+
 dag = DAG(
     dag_id="sweep_experiment_dag",
     default_view="tree",
@@ -34,39 +36,48 @@ def _init_sweep(sweep_config) -> str:
 
 init_sweep = _init_sweep(sweep_config="{{ dag_run.conf['sweep_config'] }}")
 
-login_wandb >> init_sweep 
 
-
-run_agents = ECSOperator(
-    task_id="run_agents",
-    dag=dag,
-    aws_conn_id="aws_default",
-    cluster=os.environ.get("SWEEP_AGENTS_CLUSTER"),
-    launch_type="EC2",
-    capacity_provider_strategy=[{
-        "capacityProvider": os.environ.get("SWEEP_AGENTS_CAPACITY_PROVIDER"),
-        "weight": 1,
-        "base": 1
-    }],
-    network_configuration={
-        "awsvpcConfiguration": {
-            "securityGroups": [os.environ.get("SECURITY_GROUP")],
-            "subnets": os.environ.get("SUBNET_IDS").split(",")
-        }
-    },
-    task_definition=os.environ.get("SWEEP_TASK_DEFINITION_ARN"),
-    overrides={
-        "containerOverrides": [
-            {
-                "name": os.environ.get("SWEEP_CONTAINER_NAME"),
-                "command": ["/bin/bash", "exp/init.sh", init_sweep]
+def run_agents(init_sweep, i):
+    return ECSOperator(
+        task_id=f"run_agents_{i}",
+        dag=dag,
+        aws_conn_id="aws_default",
+        cluster=os.environ.get("SWEEP_AGENTS_CLUSTER"),
+        launch_type="EC2",
+        capacity_provider_strategy=[{
+            "capacityProvider": os.environ.get("SWEEP_AGENTS_CAPACITY_PROVIDER"),
+            "weight": 1,
+            "base": 1
+        }],
+        network_configuration={
+            "awsvpcConfiguration": {
+                "securityGroups": [os.environ.get("SECURITY_GROUP")],
+                "subnets": os.environ.get("SUBNET_IDS").split(",")
             }
-        ]
-    },
-    awslogs_group=os.environ.get("AWS_LOG_GROUP"),
-    awslogs_region=os.environ.get("AWS_DEFAULT_REGION"),
-    awslogs_stream_prefix=path.join(
-        os.environ.get("AWS_LOG_STREAM_PREFIX_SWEEP"),
-        "SweepContainer"    # TODO: Derive from config
+        },
+        task_definition=os.environ.get("SWEEP_TASK_DEFINITION_ARN"),
+        overrides={
+            "containerOverrides": [
+                {
+                    "name": os.environ.get("SWEEP_CONTAINER_NAME"),
+                    "command": [
+                        "/bin/bash", 
+                        "exp/init.sh", 
+                        init_sweep,
+                        "{{ dag_run.conf.get('n_runs_per_worker', 1) }}"
+                    ]
+                }
+            ]
+        },
+        awslogs_group=os.environ.get("AWS_LOG_GROUP"),
+        awslogs_region=os.environ.get("AWS_DEFAULT_REGION"),
+        awslogs_stream_prefix=path.join(
+            os.environ.get("AWS_LOG_STREAM_PREFIX_SWEEP"),
+            "SweepContainer"    # TODO: Derive from config
+        )
     )
-)
+
+
+login_wandb >> init_sweep >> [
+    run_agents(init_sweep, i) for i in range(NUM_SWEEP_TASKS)
+]
