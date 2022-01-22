@@ -19,7 +19,7 @@ dag = DAG(
     schedule_interval=None,
     start_date=datetime.datetime(2022, 1, 1),
     catchup=False,
-    render_template_as_native_obj=True
+    render_template_as_native_obj=False
 )
 
 
@@ -31,10 +31,13 @@ login_wandb = BashOperator(
 )
 
 @task(task_id="init_sweep")
-def _init_sweep(sweep_config) -> str:
+def _init_sweep(json_sweep_config) -> str:
+    sweep_config = json.loads(json_sweep_config)
+    sweep_config["program"] = "run_exp.py"
+    sweep_config["command"] = ["${env}", "python3.9", "${program}", "${args}"]
     return wandb.sweep(sweep_config)
 
-init_sweep = _init_sweep(sweep_config="{{ dag_run.conf['sweep_config'] }}")
+init_sweep = _init_sweep("{{ dag_run.conf['sweep_config'] }}")
 
 
 def run_agents(init_sweep, i):
@@ -64,7 +67,7 @@ def run_agents(init_sweep, i):
                         "/bin/bash", 
                         "exp/init.sh", 
                         init_sweep,
-                        "{{ dag_run.conf.get('n_runs_per_worker', '1')|string }}"
+                        "{{ dag_run.conf.get('n_runs_per_worker', 1) }}"
                     ]
                 }
             ]
