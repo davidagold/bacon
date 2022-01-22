@@ -32,22 +32,27 @@ login_wandb = BashOperator(
 
 
 @task(task_id="init_sweep")
-def _init_sweep(sweep_config) -> str:
+def init_sweep(conf) -> str:
+    sweep_config = conf["sweep_config"]
+    # env, program, args are interpolated by wandb
     sweep_config["command"] = ["${env}", "python3.9", "${program}", "${args}"]
     return wandb.sweep(sweep_config)
 
-init_sweep = _init_sweep("{{ dag_run.conf['sweep_config'] }}")
+sweep_id = init_sweep("{{ dag_run.conf }}")
+
+login_wandb >> sweep_id
 
 
 # We require this as a standalone task to cast `n_runs_per_task` as a string
 # post- template rendering
 @task(task_id="pull_n_runs")
-def pull_n_runs() -> str:
-    return str("{{ dag_run.conf.get('n_runs_per_task', 1) }}")
+def pull_n_runs_per_task(conf) -> str:
+    return str(conf.get("n_runs_per_task", 1))
 
 
 def run_agents():
-    n_runs = pull_n_runs()
+    n_runs_per_task = pull_n_runs_per_task("{{ dag_run.conf) }}")
+
     for i in range(NUM_SWEEP_TASKS):
         yield ECSOperator(
             task_id=f"run_agents_{i}",
@@ -74,8 +79,8 @@ def run_agents():
                         "command": [
                             "/bin/bash", 
                             "exp/init.sh", 
-                            init_sweep,
-                            n_runs
+                            sweep_id,
+                            n_runs_per_task
                         ]
                     }
                 ]
@@ -87,6 +92,3 @@ def run_agents():
                 "SweepContainer"    # TODO: Derive from config
             )
         )
-
-
-login_wandb >> init_sweep >> [*run_agents()]
