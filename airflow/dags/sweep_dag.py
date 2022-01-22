@@ -40,8 +40,6 @@ def init_sweep(conf) -> str:
 
 sweep_id = init_sweep("{{ dag_run.conf }}")
 
-login_wandb >> sweep_id
-
 
 # We require this as a standalone task to cast `n_runs_per_task` as a string
 # post- template rendering
@@ -92,3 +90,6 @@ def run_agents():
                 "SweepContainer"    # TODO: Derive from config
             )
         )
+
+
+login_wandb >> sweep_id >> [*run_agents()]
