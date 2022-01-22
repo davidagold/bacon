@@ -64,7 +64,7 @@ def run_agents(init_sweep, i):
                         "/bin/bash", 
                         "exp/init.sh", 
                         init_sweep,
-                        str("{{ dag_run.conf.get('n_runs_per_worker', 1) }}")
+                        "{{ str(dag_run.conf.get('n_runs_per_worker', 1)) }}"
                     ]
                 }
             ]
