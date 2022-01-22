@@ -96,7 +96,7 @@ export class Airflow extends Construct {
             }
         )
         this.image = ecs.ContainerImage.fromEcrRepository(
-            airflowImageRepo, "latest"
+            airflowImageRepo, this.node.tryGetContext("airflowImageTag")
         )
 
         let workerTask = airflowTask; // TODO: simplify
