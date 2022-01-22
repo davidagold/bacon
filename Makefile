@@ -23,7 +23,7 @@ deploy:
 	cdk deploy \
 		--context env=$(env) \
 		--context sweepTaskImageTag=$(sweep_task_tag) \
-		--context airflowTag=$(airflow_tag)
+		--context airflowImageTag=$(airflow_tag)
 
 test-dag:
 	SUBNET_IDS="a,b" \
