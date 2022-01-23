@@ -64,6 +64,7 @@ export class Airflow extends Construct {
             EFS_FILE_SYSTEM_ID: props.volumeInfo.fileSystem.fileSystemId,
             LOG_STREAM_PREFIX_SWEEP: LOG_STREAM_PREFIX_SWEEP,
             MOUNT_POINT: config.EFS_MOUNT_POINT,
+            N_SWEEP_TASKS: config.N_SWEEP_TASKS.toString(),
             SECURITY_GROUP: props.defaultVpcSecurityGroup.securityGroupId,
             SUBNET_IDS: props.subnets.map(subnet => subnet.subnetId).join(","),
             SWEEP_AGENTS_CLUSTER: props.sweepTask.cluster.clusterName,

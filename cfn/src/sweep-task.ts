@@ -17,7 +17,9 @@ import { EfsVolumeInfo } from "../bacon"
 import { Policies } from "../src/policies"
 
 
-const INSTANCE_TYPES = ["c5.9xlarge", "p2.8xlarge"]
+const INSTANCE_TYPES = new Map()
+    .set("c5.9xlarge", { vcpu: 32, gbMemory: 72 })
+    .set("p2.8xlarge", { vcpu: 32, gbMemory: 488 })
 
 interface SweepTaskProps {
     vpc: ec2.Vpc
@@ -35,10 +37,11 @@ export class SweepTask extends Construct {
     constructor(scope: Construct, id: string, props: SweepTaskProps) {
         super(scope, id)
 
-        let instanceType = scope.node.tryGetContext("sweepTaskInstanceType")
-        if (INSTANCE_TYPES.findIndex(t => t === instanceType) < 0) {
-            throw new Error(`context.sweepTaskInstanceType must be from ${INSTANCE_TYPES}`)
+        let instanceType = this.node.tryGetContext("sweepTaskInstanceType")
+        if ([...INSTANCE_TYPES.keys()].findIndex(t => t === instanceType) < 0) {
+            throw new Error(`context.sweepTaskInstanceType must be from ${[...INSTANCE_TYPES.keys()]}`)
         }
+        let numSweepTasks = this.node.tryGetContext("numSweepTasks")
 
         let autoScalingGroup = new autoscaling.AutoScalingGroup(this, 'ASG', {
             vpc: props.vpc,
@@ -87,15 +90,13 @@ export class SweepTask extends Construct {
                 ), 
                 this.node.tryGetContext("sweepTaskImageTag")
             ),
-            cpu: 1024 * 4,
-            // memoryReservationMiB: 1024 * 32,
-            memoryReservationMiB: 1024 * 8,
+            cpu: Math.trunc(1024 * (INSTANCE_TYPES.get(instanceType).vcpu / numSweepTasks - 0.5)),
+            memoryReservationMiB: Math.trunc(1024 * (INSTANCE_TYPES.get(instanceType).gbMemory / numSweepTasks - 0.5)),
             logging: new ecs.AwsLogDriver({ 
                 streamPrefix: LOG_STREAM_PREFIX_SWEEP, logGroup: props.logGroup
             }),
-            // gpuCount: 1
+            gpuCount: this.node.tryGetContext("sweepTaskInstanceType") === "p2.8xlarge" ? 1 : 0,
             environment: {
-                N_SWEEP_TASKS: this.node.tryGetContext("numSweepTasks"),
                 AWS_REGION: Aws.REGION,
                 EFS_FILE_SYSTEM_ID: props.volumeInfo.fileSystem.fileSystemId,
                 WANDB_API_KEY: SecretValue.secretsManager(

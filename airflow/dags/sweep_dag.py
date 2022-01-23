@@ -1,7 +1,6 @@
 import datetime
 import os
 from os import path
-import json
 from typing import Dict
 
 from airflow import DAG
@@ -10,8 +9,6 @@ from airflow.operators.bash import BashOperator
 from airflow.decorators import task
 import wandb
 
-
-NUM_SWEEP_TASKS = 8
 
 dag = DAG(
     dag_id="sweep_experiment_dag",
@@ -49,9 +46,10 @@ def pull_n_runs_per_task(config: Dict[str, any]) -> str:
 
 
 def run_agents_tasks():
+    n_tasks = int(os.environ.get("N_SWEEP_TASKS"))
     n_runs_per_task = pull_n_runs_per_task("{{ dag_run.conf }}")
 
-    for i in range(NUM_SWEEP_TASKS):
+    for i in range(n_tasks):
         yield ECSOperator(
             task_id=f"run_agents_{i}",
             dag=dag,
