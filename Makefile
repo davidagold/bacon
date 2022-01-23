@@ -3,8 +3,11 @@ SHELL :/bin/bash
 .PHONY: image-airflow image-registrar deploy-images deploy
 
 env=staging
-sweep_task_tag=$(shell cd ../unet && git rev-parse HEAD)
-airflow_tag=$(shell git rev-parse HEAD)
+sweepTaskImageTag=$(shell cd ../unet && git rev-parse HEAD)
+airflowImageTag=$(shell git rev-parse HEAD)
+sweepTaskInstanceType=6
+numSweepTasks="c5.9xlarge"
+maxNumInstances=1
 
 image-airflow:
 	DOCKER_BUILDKIT=0 docker build \
@@ -22,8 +25,11 @@ deploy-images:
 deploy:
 	cdk deploy \
 		--context env=$(env) \
-		--context sweepTaskImageTag=$(sweep_task_tag) \
-		--context airflowImageTag=$(airflow_tag)
+		--context sweepTaskImageTag=$(sweepTaskImageTag) \
+		--context airflowImageTag=$(airflowImageTag) \
+		--context sweepTaskInstanceType=$(sweepTaskInstanceType) \
+		--context numSweepTasks=$(numSweepTasks) \
+		--context maxNumInstances=$(maxNumInstances)
 
 test-dag:
 	SUBNET_IDS="a,b" \

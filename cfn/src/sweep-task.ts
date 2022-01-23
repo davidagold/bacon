@@ -46,7 +46,7 @@ export class SweepTask extends Construct {
             instanceType: new ec2.InstanceType(instanceType),
             machineImage: ecs.EcsOptimizedImage.amazonLinux2(),
             minCapacity: 0,
-            maxCapacity: 1,
+            maxCapacity: this.node.tryGetContext("maxNumInstances"),
             vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
             keyName: this.node.tryGetContext("sweepTaskAsgKeyName")
         });
@@ -95,6 +95,7 @@ export class SweepTask extends Construct {
             }),
             // gpuCount: 1
             environment: {
+                N_SWEEP_TASKS: this.node.tryGetContext("numSweepTasks"),
                 AWS_REGION: Aws.REGION,
                 EFS_FILE_SYSTEM_ID: props.volumeInfo.fileSystem.fileSystemId,
                 WANDB_API_KEY: SecretValue.secretsManager(

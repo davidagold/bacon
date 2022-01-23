@@ -32,7 +32,7 @@ login_wandb = BashOperator(
 
 
 @task(task_id="init_sweep")
-def init_sweep(config) -> str:
+def init_sweep(config: Dict[str, any]) -> str:
     sweep_config = config["sweep_config"]
     # env, program, args are interpolated by wandb
     sweep_config["command"] = ["${env}", "python3.9", "${program}", "${args}"]
@@ -42,13 +42,13 @@ sweep_id = init_sweep("{{ dag_run.conf }}")
 
 
 # We require this as a standalone task to cast `n_runs_per_task` as a string
-# post- template rendering
+# post- template rendering, since Jinja unfailingly casts it to int
 @task(task_id="pull_n_runs")
-def pull_n_runs_per_task(config) -> str:
+def pull_n_runs_per_task(config: Dict[str, any]) -> str:
     return str(config.get("n_runs_per_task", 1))
 
 
-def run_agents():
+def run_agents_tasks():
     n_runs_per_task = pull_n_runs_per_task("{{ dag_run.conf }}")
 
     for i in range(NUM_SWEEP_TASKS):
@@ -92,4 +92,4 @@ def run_agents():
         )
 
 
-login_wandb >> sweep_id >> [*run_agents()]
+login_wandb >> sweep_id >> [*run_agents_tasks()]
