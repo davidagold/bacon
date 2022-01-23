@@ -49,7 +49,7 @@ def pull_n_runs_per_task(config) -> str:
 
 
 def run_agents():
-    n_runs_per_task = pull_n_runs_per_task("{{ dag_run.conf) }}")
+    n_runs_per_task = pull_n_runs_per_task("{{ dag_run.conf }}")
 
     for i in range(NUM_SWEEP_TASKS):
         yield ECSOperator(
