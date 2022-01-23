@@ -1,6 +1,6 @@
 SHELL :/bin/bash
 
-.PHONY: venv install image-airflow image-registrar deploy-images deploy test-dag
+.PHONY: venv install image-airflow image-registrar deploy-images deploy test-dag clean
 
 env=staging
 sweepTaskImageTag=$(shell cd ../unet && git rev-parse HEAD)
@@ -47,3 +47,6 @@ test-dag: install
 	N_SWEEP_TASKS=8 \
 	python airflow/dags/sweep_dag.py; \
 	deactivate
+
+clean:
+	rm -rf venv dist
