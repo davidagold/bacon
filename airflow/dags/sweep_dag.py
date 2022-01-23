@@ -32,8 +32,8 @@ login_wandb = BashOperator(
 
 
 @task(task_id="init_sweep")
-def init_sweep(conf) -> str:
-    sweep_config = conf["sweep_config"]
+def init_sweep(config) -> str:
+    sweep_config = config["sweep_config"]
     # env, program, args are interpolated by wandb
     sweep_config["command"] = ["${env}", "python3.9", "${program}", "${args}"]
     return wandb.sweep(sweep_config)
@@ -44,8 +44,8 @@ sweep_id = init_sweep("{{ dag_run.conf }}")
 # We require this as a standalone task to cast `n_runs_per_task` as a string
 # post- template rendering
 @task(task_id="pull_n_runs")
-def pull_n_runs_per_task(conf) -> str:
-    return str(conf.get("n_runs_per_task", 1))
+def pull_n_runs_per_task(config) -> str:
+    return str(config.get("n_runs_per_task", 1))
 
 
 def run_agents():
