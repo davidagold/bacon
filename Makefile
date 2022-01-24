@@ -14,8 +14,9 @@ venv:
 	virtualenv --python=python3.9 venv
 
 install: venv
-	source venv/bin/activate; \
-	pip install -r airflow/requirements.txt; \
+	npm install && \
+	source venv/bin/activate && \
+	pip install -r airflow/requirements.txt && \
 	deactivate
 
 image-airflow:
