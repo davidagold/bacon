@@ -25,7 +25,7 @@ class Bacon extends cdk.Stack {
 
         let vpc = new ec2.Vpc(this, 'Vpc', {
             maxAzs: 2,
-            natGateways: 0,
+            natGateways: 1,
             subnetConfiguration: [
                 {
                     name: "public",
@@ -36,7 +36,7 @@ class Bacon extends cdk.Stack {
                 {
                     name: "private",
                     cidrMask: 24,
-                    subnetType: ec2.SubnetType.PRIVATE_ISOLATED,
+                    subnetType: ec2.SubnetType.PRIVATE_WITH_NAT,
                 }
             ]
         });
@@ -56,13 +56,6 @@ class Bacon extends cdk.Stack {
             volumeName: "SharedVolume",
             fileSystem: fileSystem
         }
-        vpc.privateSubnets.forEach((subnet) => {
-            new efs.CfnMountTarget(this, "EfsMountTarget", {
-                fileSystemId: fileSystem.fileSystemId,
-                securityGroups: [efsSecurityGroup.securityGroupId],
-                subnetId: subnet.subnetId
-            })
-        })
         new CfnOutput(this, "EfsFileSystemId", {
             value: fileSystem.fileSystemId,
             exportName: Fn.join("-", [Aws.STACK_NAME, "EfsFileSystemId"])
@@ -80,7 +73,7 @@ class Bacon extends cdk.Stack {
             cluster: cluster,
             vpc: vpc,
             defaultVpcSecurityGroup: defaultVpcSecurityGroup,
-            subnets: vpc.publicSubnets,
+            subnets: vpc.privateSubnets,
             volumeInfo: volumeInfo,
             logGroup: logGroup,
             sweepTask: new SweepTask(this, "SweepTask", { 

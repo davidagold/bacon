@@ -59,7 +59,7 @@ export class Rds extends Construct {
         instanceIdentifier: Fn.join("-", [Aws.STACK_NAME, config.rds.dbName]),
         vpc: props.vpc,
         securityGroups: [props.defaultVpcSecurityGroup],
-        vpcSubnets: { subnetType: SubnetType.PRIVATE_ISOLATED },
+        vpcSubnets: { subnetType: SubnetType.PRIVATE_WITH_NAT },
         storageEncrypted: true,
         multiAz: false,
         autoMinorVersionUpgrade: false,

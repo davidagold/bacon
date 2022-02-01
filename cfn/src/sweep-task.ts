@@ -17,7 +17,9 @@ import { EfsVolumeInfo } from "../bacon"
 import { Policies } from "../src/policies"
 
 
-const INSTANCE_TYPES = ["c5.9xlarge", "p2.8xlarge"]
+const INSTANCE_TYPES = new Map()
+    .set("c5.9xlarge", { vcpu: 32, gbMemory: 72 })
+    .set("p2.8xlarge", { vcpu: 32, gbMemory: 488 })
 
 interface SweepTaskProps {
     vpc: ec2.Vpc
@@ -35,10 +37,11 @@ export class SweepTask extends Construct {
     constructor(scope: Construct, id: string, props: SweepTaskProps) {
         super(scope, id)
 
-        let instanceType = scope.node.tryGetContext("sweepTaskInstanceType")
-        if (INSTANCE_TYPES.findIndex(t => t === instanceType) < 0) {
-            throw new Error(`context.sweepTaskInstanceType must be from ${INSTANCE_TYPES}`)
+        let instanceType = this.node.tryGetContext("sweepTaskInstanceType")
+        if ([...INSTANCE_TYPES.keys()].findIndex(t => t === instanceType) < 0) {
+            throw new Error(`context.sweepTaskInstanceType must be from ${[...INSTANCE_TYPES.keys()]}`)
         }
+        let numSweepTasks = this.node.tryGetContext("numSweepTasks")
 
         let autoScalingGroup = new autoscaling.AutoScalingGroup(this, 'ASG', {
             vpc: props.vpc,
@@ -46,15 +49,17 @@ export class SweepTask extends Construct {
             instanceType: new ec2.InstanceType(instanceType),
             machineImage: ecs.EcsOptimizedImage.amazonLinux2(),
             minCapacity: 0,
-            maxCapacity: 1,
-            associatePublicIpAddress: true,
-            vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC }
+            maxCapacity: this.node.tryGetContext("maxNumInstances"),
+            vpcSubnets: { subnetType: ec2.SubnetType.PRIVATE_WITH_NAT },
+            keyName: this.node.tryGetContext("sweepTaskAsgKeyName")
         });
         this.capacityProvider = new ecs.AsgCapacityProvider(
             this,
             "AsgCapacityProvider", 
             { autoScalingGroup }
         )
+        autoScalingGroup.connections.allowFromAnyIpv4(ec2.Port.tcp(22))
+
         this.cluster = new ecs.Cluster(this, "SweepCluster", { vpc: props.vpc })
         this.cluster.addAsgCapacityProvider(this.capacityProvider)
 
@@ -77,21 +82,20 @@ export class SweepTask extends Construct {
                     this, 
                     "SweepTaskDockerRepo", 
                     {
-                        repositoryName: Fn.join("-", ["unet", "images", "staging"]), // TODO: Parametrize
+                        repositoryName: Fn.join("-", ["unet", "images", "staging", "sweep"]), // TODO: Parametrize
                         repositoryArn:  Fn.importValue(Fn.join("-", [
                             "unet", "images", "staging", "SweepTaskDkrRepositoryArn"
                         ]))
                     }
                 ), 
-                "latest"
+                this.node.tryGetContext("sweepTaskImageTag")
             ),
-            cpu: 1024 * 4,
-            // memoryReservationMiB: 1024 * 32,
-            memoryReservationMiB: 1024 * 8,
+            cpu: Math.trunc(1024 * (INSTANCE_TYPES.get(instanceType).vcpu / numSweepTasks - 0.5)),
+            memoryReservationMiB: Math.trunc(1024 * (INSTANCE_TYPES.get(instanceType).gbMemory / numSweepTasks - 0.5)),
             logging: new ecs.AwsLogDriver({ 
                 streamPrefix: LOG_STREAM_PREFIX_SWEEP, logGroup: props.logGroup
             }),
-            // gpuCount: 1
+            gpuCount: this.node.tryGetContext("sweepTaskInstanceType") === "p2.8xlarge" ? 1 : 0,
             environment: {
                 AWS_REGION: Aws.REGION,
                 EFS_FILE_SYSTEM_ID: props.volumeInfo.fileSystem.fileSystemId,
