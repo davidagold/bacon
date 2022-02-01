@@ -16,6 +16,7 @@ Choose between [c5.9xlarge](https://aws.amazon.com/ec2/instance-types/c5/) (defa
 - (*Optional*) An EC2 key pair with which to connect to the sweep task autoscaling group
 - NodeJS and NPM  (the present package was developed against versions `v14.18.1` and `v8.3.0`, respectively)
 - Python `virtualenv` module and an accessible `python3.9` distribution
+- An AWS Secrets Manager secret named `WandbApiTokenSecret` with a key-value pair `WandbApiKey: <key>`, where `<key>` is your W&B access token.
 
 
 ## Installation
@@ -33,6 +34,8 @@ The following command deploys the Images stack:
 ```
 $ make deploy-images [env=<value>]
 ```
+
+The default value for `env` is `staging`.
 
 
 ### Bacon (`bacon-<env>`)
