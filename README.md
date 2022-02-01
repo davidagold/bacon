@@ -74,7 +74,14 @@ A sweep experiment config passed to the `sweep_dag` trigger should contain the f
 
 ## Example
 
+`example/unet` is an example project that uses Bacon to orchestrate experiments. 
+It consists of:
+- UNet implementation and training procedure 
+- Sweep experiment Docker image
+- Example experiment configuration `unet/exp/config.json`
 
+The sweep experiment Docker image's entrypoint is a shell script that invokes the training procedure via the W&B sweep agent.
+The sweep agent pulls parameters from the W&B server against which the sweep from the `init_sweep` Airflow task was executed.
 
 
 ## Make targets

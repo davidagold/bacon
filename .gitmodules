@@ -1,0 +1,3 @@
+[submodule "example/unet"]
+	path = example/unet
+	url = git@github.com:davidagold/unet.git
