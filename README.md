@@ -1,7 +1,8 @@
 # Bacon
 
-[Bacon](https://en.wikipedia.org/wiki/Francis_Bacon) is a framework for orchestrating machine learning experiments. The stack consists of:
-- Airflow service running on ECS Fargate,
+[Bacon](https://en.wikipedia.org/wiki/Francis_Bacon) is a framework for orchestrating machine learning experiments on AWS. 
+The stack consists of:
+- Airflow service on ECS Fargate,
 - ECS autoscaling group on which to run Weights & Biases hyperparameter sweeps
 - API to trigger parallelized W&B sweep runs.
 
@@ -13,7 +14,7 @@ Choose between [c5.9xlarge](https://aws.amazon.com/ec2/instance-types/c5/) (defa
 - AWS account and user with appropriate permissions and credentials
 - (*Optional*) Running On-demand P instances vCPU quota >= 32 (if using `p2.8xlarge` instance type)
 - (*Optional*) An EC2 key pair with which to connect to the sweep task autoscaling group
-- NodeJS and NPM  (the present package was developed against versions ``v14.18.1` and `v8.3.0`, respectively)
+- NodeJS and NPM  (the present package was developed against versions `v14.18.1` and `v8.3.0`, respectively)
 - Python `virtualenv` module and an accessible `python3.9` distribution
 
 
@@ -26,8 +27,8 @@ Choose between [c5.9xlarge](https://aws.amazon.com/ec2/instance-types/c5/) (defa
 
 ### Images (`bacon-<env>-images`)
 
-The `-images` stack provisions for CodeBuild projects that build the requisite Docker images. 
-The following command deploys the `-images` stack:
+The Images stack provisions for CodeBuild projects that build the requisite Docker images. 
+The following command deploys the Images stack:
 
 ```
 $ make deploy-images [env=<value>]
@@ -51,7 +52,6 @@ where `contextVar` belongs to the following options:
 - `sweepTaskInstanceType`: Instance Type for sweep task autoscaling group (default: `c5.9xlarge`)
 - `numSweepTasks`: Number of sweep tasks to run (default: `8`)
 - `maxNumInstances`: Max number of instances to run in autoscaling group (default: `1`)
-
 
 
 ## API
@@ -78,10 +78,16 @@ A sweep experiment config passed to the `sweep_dag` trigger should contain the f
 It consists of:
 - UNet implementation and training procedure 
 - Sweep experiment Docker image
-- Example experiment configuration `unet/exp/config.json`
+- Example experiment configuration
 
 The sweep experiment Docker image's entrypoint is a shell script that invokes the training procedure via the W&B sweep agent.
 The sweep agent pulls parameters from the W&B server against which the sweep from the `init_sweep` Airflow task was executed.
+
+To run the example on your Bacon stack,
+1. Navigate to the sweep DAG in the Airflow console
+1. Trigger the DAG with `example/unet/exp/config.json` as the DAG `conf``
+
+You can obtain the W&B sweep URL from the `init_sweep` Airflow task logs and then observe the experiment in the W&B console.
 
 
 ## Make targets
