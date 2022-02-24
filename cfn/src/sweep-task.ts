@@ -19,7 +19,7 @@ import { Policies } from "../src/policies"
 
 const INSTANCE_TYPES = new Map()
     .set("c5.9xlarge", { vcpu: 32, gbMemory: 72 })
-    .set("p2.8xlarge", { vcpu: 32, gbMemory: 488 })
+    .set("p3.8xlarge", { vcpu: 32, gbMemory: 488 })
 
 interface SweepTaskProps {
     vpc: ec2.Vpc
@@ -95,7 +95,7 @@ export class SweepTask extends Construct {
             logging: new ecs.AwsLogDriver({ 
                 streamPrefix: LOG_STREAM_PREFIX_SWEEP, logGroup: props.logGroup
             }),
-            gpuCount: this.node.tryGetContext("sweepTaskInstanceType") === "p2.8xlarge" ? 1 : 0,
+            gpuCount: this.node.tryGetContext("sweepTaskInstanceType") === "p3.8xlarge" ? 1 : 0,
             environment: {
                 AWS_REGION: Aws.REGION,
                 EFS_FILE_SYSTEM_ID: props.volumeInfo.fileSystem.fileSystemId,

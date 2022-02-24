@@ -7,12 +7,12 @@ The stack consists of:
 - API to trigger parallelized W&B sweep runs.
 
 Sweeps are run in parallel over eight workers per EC2 instance.
-Choose between [c5.9xlarge](https://aws.amazon.com/ec2/instance-types/c5/) (default) or [p2.8xlarge](https://aws.amazon.com/ec2/instance-types/p2/) instances for training.
+Choose between [c5.9xlarge](https://aws.amazon.com/ec2/instance-types/c5/) (default) or [p3.8xlarge](https://aws.amazon.com/ec2/instance-types/p2/) instances for training.
 
 
 ## Prerequisites
 - AWS account and user with appropriate permissions and credentials
-- (*Optional*) Running On-demand P instances vCPU quota >= 32 (if using `p2.8xlarge` instance type)
+- (*Optional*) Running On-demand P instances vCPU quota >= 32 (if using `p3.8xlarge` instance type)
 - (*Optional*) An EC2 key pair with which to connect to the sweep task autoscaling group
 - NodeJS and NPM  (the present package was developed against versions `v14.18.1` and `v8.3.0`, respectively)
 - Python `virtualenv` module and an accessible `python3.9` distribution

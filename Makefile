@@ -3,7 +3,7 @@ SHELL :/bin/bash
 .PHONY: venv install image-airflow image-registrar deploy-images deploy test-dag clean
 
 env=staging
-sweepTaskImageTag=$(shell cd ../unet && git rev-parse HEAD)
+sweepTaskImageTag=$(shell cd example/unet && git rev-parse HEAD)
 airflowImageTag=$(shell git rev-parse HEAD)
 sweepTaskInstanceType="c5.9xlarge"
 numSweepTasks=8
@@ -30,10 +30,10 @@ image-registrar:
 	DOCKER_BUILDKIT=0 docker build -t bacon-registrar:latest .
 
 deploy-images:
-	cdk deploy -a "npx ts-node --prefer-ts-exts cfn/images.ts" --context env=$(env)
+	node_modules/aws-cdk/bin/cdk deploy -a "npx ts-node --prefer-ts-exts cfn/images.ts" --context env=$(env)
 
 deploy:
-	cdk deploy \
+	node_modules/aws-cdk/bin/cdk deploy \
 		--context env=$(env) \
 		--context sweepTaskImageTag=$(sweepTaskImageTag) \
 		--context airflowImageTag=$(airflowImageTag) \
