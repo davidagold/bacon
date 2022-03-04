@@ -19,7 +19,8 @@ import { Policies } from "../src/policies"
 
 const INSTANCE_TYPES = new Map()
     .set("c5.9xlarge", { vcpu: 32, gbMemory: 72 })
-    .set("p3.8xlarge", { vcpu: 32, gbMemory: 488 })
+    .set("p3.8xlarge", { vcpu: 32, gbMemory: 488, gpus: 4 })
+const DEFAULT_INSTANCE_TYPE = "c5.9xlarge"
 
 interface SweepTaskProps {
     vpc: ec2.Vpc
@@ -37,7 +38,7 @@ export class SweepTask extends Construct {
     constructor(scope: Construct, id: string, props: SweepTaskProps) {
         super(scope, id)
 
-        let instanceType = this.node.tryGetContext("sweepTaskInstanceType")
+        let instanceType = this.node.tryGetContext("sweepTaskInstanceType") ?? DEFAULT_INSTANCE_TYPE
         if ([...INSTANCE_TYPES.keys()].findIndex(t => t === instanceType) < 0) {
             throw new Error(`context.sweepTaskInstanceType must be from ${[...INSTANCE_TYPES.keys()]}`)
         }
