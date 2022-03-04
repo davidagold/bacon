@@ -66,8 +66,8 @@ const EFS_MOUNT_POINT = "/mnt/efs"
 export const config: Config = {
     EFS_MOUNT_POINT: EFS_MOUNT_POINT,
     airflow: {
-        cpu: 1024,
-        memoryLimitMiB: 3 * 1024,
+        cpu: 2 * 1024,
+        memoryLimitMiB: 4 * 1024,
         webserver: defaultWebserverConfig,
         scheduler: defaultSchedulerConfig,
         worker: defaultWorkerConfig,
