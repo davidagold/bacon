@@ -68,8 +68,8 @@ export const config: Config = {
     EFS_MOUNT_POINT: EFS_MOUNT_POINT,
     N_SWEEP_TASKS: 8,
     airflow: {
-        cpu: 512,
-        memoryLimitMiB: 1024,
+        cpu: 1024,
+        memoryLimitMiB: 2 * 1024,
         webserver: defaultWebserverConfig,
         scheduler: defaultSchedulerConfig,
         worker: defaultWorkerConfig,
