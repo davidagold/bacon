@@ -30,7 +30,8 @@ image-registrar:
 	DOCKER_BUILDKIT=0 docker build -t bacon-registrar:latest .
 
 deploy-images:
-	node_modules/aws-cdk/bin/cdk deploy -a "npx ts-node --prefer-ts-exts cfn/images.ts" --context env=$(env)
+	node_modules/aws-cdk/bin/cdk deploy -a "npx ts-node --prefer-ts-exts cfn/images.ts" \
+		--context env=$(env)
 
 deploy:
 	node_modules/aws-cdk/bin/cdk deploy \
