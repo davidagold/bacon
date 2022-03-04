@@ -38,7 +38,6 @@ export interface RdsConfig {
 }
 
 export interface Config {
-    readonly N_SWEEP_TASKS: number,
     readonly EFS_MOUNT_POINT: string,
     readonly airflow: AirflowTaskConfig
     readonly workerAutoScaling: AutoScalingConfig
@@ -66,7 +65,6 @@ const defaultWorkerConfig: ContainerConfig = {
 const EFS_MOUNT_POINT = "/mnt/efs"
 export const config: Config = {
     EFS_MOUNT_POINT: EFS_MOUNT_POINT,
-    N_SWEEP_TASKS: 8,
     airflow: {
         cpu: 1024,
         memoryLimitMiB: 3 * 1024,
