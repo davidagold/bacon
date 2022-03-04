@@ -5,8 +5,8 @@ SHELL :/bin/bash
 env=staging
 sweepTaskImageTag=$(shell cd example/unet && git rev-parse HEAD)
 airflowImageTag=$(shell git rev-parse HEAD)
-sweepTaskInstanceType="c5.9xlarge"
-numSweepTasks=8
+sweepTaskInstanceType="p3.8xlarge"
+numSweepTasks=4
 maxNumInstances=1
 
 
