@@ -69,7 +69,7 @@ export const config: Config = {
     N_SWEEP_TASKS: 8,
     airflow: {
         cpu: 1024,
-        memoryLimitMiB: 2 * 1024,
+        memoryLimitMiB: 3 * 1024,
         webserver: defaultWebserverConfig,
         scheduler: defaultSchedulerConfig,
         worker: defaultWorkerConfig,

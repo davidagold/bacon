@@ -76,17 +76,6 @@ export class Airflow extends Construct {
             ).toString()
         };
 
-        const airflowTask = new FargateTaskDefinition(this, 'AirflowTask', {
-            cpu: config.airflow.cpu,
-            memoryLimitMiB: config.airflow.memoryLimitMiB,
-            volumes: [{
-                name: props.volumeInfo.volumeName,
-                efsVolumeConfiguration: {
-                    fileSystemId: props.volumeInfo.fileSystem.fileSystemId
-                }
-            }]
-        });
-
         let airflowDkrRepoName = `bacon-images-${this.node.tryGetContext("env")}-airflow`
         let airflowImageRepo = ecr.Repository.fromRepositoryAttributes(
             this, "AirflowImageRepository", {
@@ -100,39 +89,43 @@ export class Airflow extends Construct {
             airflowImageRepo, this.node.tryGetContext("airflowImageTag")
         )
 
-        let workerTask = airflowTask; // TODO: simplify
-        new Map()
-            .set("webserver", airflowTask)
-            .set("scheduler", airflowTask)
-            .set("worker", workerTask)
-            .forEach((task: ecs.FargateTaskDefinition, taskName: string) => {
-                let cConfig = config.airflow[taskName] as ContainerConfig
-                let container = task.addContainer(cConfig.name, {
-                    image: this.image,
-                    logging: new ecs.AwsLogDriver({
-                        streamPrefix: `airflow-${taskName}`,
-                        logGroup: props.logGroup
-                    }),
-                    environment: env,
-                    entryPoint: [cConfig.entryPoint],
-                    cpu: cConfig.cpu,
-                    memoryLimitMiB: cConfig.cpu
-                })
-                container.addMountPoints({
-                    containerPath: props.volumeInfo.containerPath,
-                    sourceVolume: props.volumeInfo.volumeName,
-                    readOnly: false
-                })
-                container.addPortMappings({ containerPort: cConfig.containerPort });
-                if (taskName === "worker") {
-                    container.addPortMappings({ containerPort: 8793 })
+        let airflowTask = new FargateTaskDefinition(this, 'AirflowTask', {
+            cpu: config.airflow.cpu,
+            memoryLimitMiB: config.airflow.memoryLimitMiB,
+            volumes: [{
+                name: props.volumeInfo.volumeName,
+                efsVolumeConfiguration: {
+                    fileSystemId: props.volumeInfo.fileSystem.fileSystemId
                 }
-                container.addToExecutionPolicy(new PolicyStatement({
-                    effect: Effect.ALLOW,
-                    actions: ["elasticfilesystem:ClientMount"],
-                    resources: [props.volumeInfo.fileSystem.fileSystemArn]
-                }))
+            }]
+        });
+
+        for (let containerName of ["webserver", "scheduler", "worker"]) {
+            let taskConfig = config.airflow[containerName] as ContainerConfig
+            let container = airflowTask.addContainer(taskConfig.name, {
+                image: this.image,
+                logging: new ecs.AwsLogDriver({
+                    streamPrefix: `airflow-${containerName}`,
+                    logGroup: props.logGroup
+                }),
+                environment: env,
+                entryPoint: [taskConfig.entryPoint]
             })
+            container.addMountPoints({
+                containerPath: props.volumeInfo.containerPath,
+                sourceVolume: props.volumeInfo.volumeName,
+                readOnly: false
+            })
+            container.addPortMappings({ containerPort: taskConfig.containerPort });
+            if (containerName === "worker") {
+                container.addPortMappings({ containerPort: 8793 })
+            }
+            container.addToExecutionPolicy(new PolicyStatement({
+                effect: Effect.ALLOW,
+                actions: ["elasticfilesystem:ClientMount"],
+                resources: [props.volumeInfo.fileSystem.fileSystemArn]
+            }))
+        }
 
         let service = new Service(this, "AirflowService", {
             cluster: props.cluster,
