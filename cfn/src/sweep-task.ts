@@ -19,7 +19,7 @@ import { Policies } from "../src/policies"
 
 const INSTANCE_TYPES = new Map()
     .set("c5.9xlarge", { vcpu: 32, gbMemory: 72 })
-    .set("p3.8xlarge", { vcpu: 32, gbMemory: 488, gpus: 4 })
+    .set("p3.8xlarge", { vcpu: 32, gbMemory: 244, gpus: 4 })
 const DEFAULT_INSTANCE_TYPE = "c5.9xlarge"
 
 interface SweepTaskProps {
