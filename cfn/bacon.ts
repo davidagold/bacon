@@ -61,7 +61,9 @@ class Bacon extends cdk.Stack {
             exportName: Fn.join("-", [Aws.STACK_NAME, "EfsFileSystemId"])
         })
         
-        new Registrar(this, "Registrar", { fileSystem: fileSystem, vpc: vpc })
+        if (this.node.tryGetContext("includeRegistrar") === "true") {
+            new Registrar(this, "Registrar", { fileSystem: fileSystem, vpc: vpc })
+        }
 
         let logGroup = new logs.LogGroup(this, "BaconLogs", {
             logGroupName: Fn.join("/", ["", Aws.STACK_NAME, "logs"]),

@@ -1,8 +1,9 @@
-SHELL :/bin/bash
+SHELL: /bin/bash
 
 .PHONY: venv install image-airflow image-registrar deploy-images deploy test-dag clean
 
 env=staging
+includeRegistrar=false
 sweepTaskImageTag=$(shell cd example/unet && git rev-parse HEAD)
 airflowImageTag=$(shell git rev-parse HEAD)
 sweepTaskInstanceType="p3.8xlarge"
@@ -36,6 +37,7 @@ deploy-images:
 deploy:
 	node_modules/aws-cdk/bin/cdk deploy \
 		--context env=$(env) \
+		--context includeRegistrar=$(includeRegistrar) \
 		--context sweepTaskImageTag=$(sweepTaskImageTag) \
 		--context airflowImageTag=$(airflowImageTag) \
 		--context sweepTaskInstanceType=$(sweepTaskInstanceType) \
