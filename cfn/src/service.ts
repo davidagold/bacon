@@ -53,6 +53,12 @@ export class Service extends Construct {
             healthCheckGracePeriod: Duration.seconds(300),
             desiredCount: 1
         });
+        let cfnService = this.fargateService.node.tryFindChild("Service") as ecs.CfnService
+        cfnService.launchType = undefined
+        cfnService.capacityProviderStrategy = [
+            { capacityProvider: 'FARGATE_SPOT', weight: 4 },
+            { capacityProvider: 'FARGATE', weight: 1 },
+        ]
 
         this.fargateService.connections.allowInternally(ec2.Port.tcp(8793));
         props.rds.rdsInstance.connections.allowFrom(
